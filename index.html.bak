@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardian Automata - Final</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://unpkg.com/kaboom@3000.1.17/dist/kaboom.js"></script>
+    <script>
+        kaboom({
+            background: [10, 10, 15],
+            width: 800,
+            height: 600,
+            letterbox: true,
+        });
+
+        // Load Sprites (Step 4)
+        // Note: Using relative paths assuming opened from the root folder
+        // Load Sprites (Base64 for CORS stability)
+        loadSprite("girl", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACZ693OAAAAAXNSR0IArs4c6QAAAiBjSFXyAACH60O... (truncated) ... ");
+        loadSprite("player", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACZ693OAAAAAXNSR0IArs4c6QAAAiBjSFXyAACH60O... (truncated) ... ");
+        loadSprite("enemy", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACZ693OAAAAAXNSR0IArs4c6QAAAiBjSFXyAACH60O... (truncated) ... ");
+        loadSprite("scrap", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACZ693OAAAAAXNSR0IArs4c6QAAAiBjSFXyAACH60O... (truncated) ... ");
+        loadSprite("explosion", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACZ693OAAAAAXNSR0IArs4c6QAAAiBjSFXyAACH60O... (truncated) ... ");
+
+        // Sound System (Step 5)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(freq, duration, type = "sine", volume = 0.1, freqEnd = 0.01) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                if (freqEnd > 0) {
+                    osc.frequency.exponentialRampToValueAtTime(freqEnd, audioCtx.currentTime + duration);
+                }
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.warn("Audio error:", e);
+            }
+        }
+
+        const sounds = {
+            shoot: () => playSound(800, 0.15, "sawtooth", 0.05, 100),
+            explode: () => playSound(120, 0.4, "square", 0.15, 20),
+            collect: () => playSound(1500, 0.1, "sine", 0.1, 800),
+            build: () => playSound(400, 0.2, "triangle", 0.1, 200),
+            damage: () => playSound(200, 0.3, "sawtooth", 0.2, 50),
+            waveStart: () => playSound(300, 0.5, "sine", 0.1, 600),
+        };
+
+        scene("start", () => {
+            add([
+                sprite("girl"),
+                pos(width() / 2, height() / 2 - 120),
+                scale(0.25),
+                anchor("center"),
+            ]);
+            add([
+                text("GUARDIAN AUTOMATA", { size: 48, font: "monospace" }),
+                pos(width() / 2, height() / 2 - 20),
+                anchor("center"),
+                color(0, 255, 100),
+            ]);
+
+            add([
+                text("WASD: MOVE | 1-3: BUILD", { size: 18, font: "monospace" }),
+                pos(width() / 2, height() / 2 + 40),
+                anchor("center"),
+                color(0, 255, 255),
+            ]);
+
+            add([
+                text("1: TURRET (3 SCRAP) | 2: WALL (1 SCRAP) | 3: TRAP (1 SCRAP)", { size: 14, font: "monospace" }),
+                pos(width() / 2, height() / 2 + 70),
+                anchor("center"),
+                color(200, 200, 200),
+            ]);
+
+            const startMsg = add([
+                text("PRESS SPACE TO INITIALIZE", { size: 24, font: "monospace" }),
+                pos(width() / 2, height() / 2 + 160),
+                anchor("center"),
+            ]);
+
+            onUpdate(() => {
+                startMsg.opacity = wave(0.3, 1, time() * 5);
+            });
+
+            onKeyPress("space", () => {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                sounds.waveStart();
+                go("main");
+            });
+        });
+
+        scene("main", () => {
+            let currentWave = 1;
+            let enemiesInWave = 0;
+            let enemiesSpawned = 0;
+            let waveState = "warning"; // warning, action, rest
+            // Guardian Girl
+            const girl = add([
+                sprite("girl"),
+                pos(width() / 2, height() / 2),
+                scale(0.15), // Adjusted scale for the generated image
+                area(),
+                anchor("center"),
+                "girl",
+                { hp: 100, maxHp: 100 }
+            ]);
+
+            const girlHpBar = add([
+                rect(100, 10),
+                pos(width() / 2, height() / 2 - 60),
+                color(50, 50, 50),
+                outline(2),
+                anchor("center"),
+            ]);
+            const girlHpFill = girlHpBar.add([
+                rect(100, 10),
+                pos(-50, -5),
+                color(0, 255, 100),
+                anchor("topleft"),
+            ]);
+
+            // Player
+            const player = add([
+                sprite("player"),
+                pos(width() / 2 - 150, height() / 2),
+                scale(0.15),
+                area(),
+                body(),
+                anchor("center"),
+                "player",
+                { speed: 300, isCarrying: false, scrapCount: 0 }
+            ]);
+
+            const carrier = player.add([
+                sprite("scrap"),
+                pos(0, -100),
+                scale(0.3),
+                anchor("center"),
+                opacity(0),
+            ]);
+
+            // Movement
+            onKeyDown("w", () => player.move(0, -player.speed));
+            onKeyDown("s", () => player.move(0, player.speed));
+            onKeyDown("a", () => player.move(-player.speed, 0));
+            onKeyDown("d", () => player.move(player.speed, 0));
+
+            // Scrap
+            function spawnScrap() {
+                add([
+                    sprite("scrap"),
+                    pos(rand(60, width() - 60), rand(60, height() - 60)),
+                    scale(0.08),
+                    area(),
+                    anchor("center"),
+                    "scrap",
+                ]);
+            }
+            loop(5, () => spawnScrap());
+
+            player.onCollide("scrap", (s) => {
+                if (!player.isCarrying) {
+                    destroy(s);
+                    player.isCarrying = true;
+                    carrier.opacity = 1;
+                    sounds.collect();
+                }
+            });
+
+            const base = add([
+                rect(140, 140),
+                pos(width() / 2, height() / 2),
+                color(0, 255, 0),
+                opacity(0.1),
+                area(),
+                outline(2, { color: rgb(0, 255, 0) }),
+                anchor("center"),
+                "base"
+            ]);
+
+            player.onCollide("base", () => {
+                if (player.isCarrying) {
+                    player.isCarrying = false;
+                    carrier.opacity = 0;
+                    player.scrapCount++;
+                    sounds.collect();
+                }
+            });
+
+            // Construction System
+            const BUILD_COSTS = {
+                turret: 3,
+                wall: 1,
+                trap: 1,
+            };
+
+            function build(type) {
+                const cost = BUILD_COSTS[type];
+                if (player.scrapCount >= cost) {
+                    player.scrapCount -= cost;
+                    const buildPos = player.pos.clone();
+
+                    if (type === "turret") {
+                        add([
+                            rect(30, 30),
+                            pos(buildPos),
+                            color(180, 180, 255),
+                            area(),
+                            outline(4),
+                            anchor("center"),
+                            "building",
+                            "turret",
+                            { hp: 80, fireRate: 0.8, timer: 0 }
+                        ]);
+                        add([
+                            text("TURRET", { size: 10 }),
+                            pos(buildPos.x, buildPos.y + 25),
+                            anchor("center")
+                        ]);
+                        sounds.build();
+                    } else if (type === "wall") {
+                        add([
+                            rect(40, 40),
+                            pos(buildPos),
+                            color(80, 80, 80),
+                            area(),
+                            body({ isStatic: true }),
+                            outline(4),
+                            anchor("center"),
+                            "building",
+                            "wall",
+                            { hp: 150 }
+                        ]);
+                        sounds.build();
+                    } else if (type === "trap") {
+                        add([
+                            rect(20, 20),
+                            pos(buildPos),
+                            circle(10),
+                            color(255, 50, 0),
+                            area(),
+                            anchor("center"),
+                            "trap",
+                        ]);
+                        sounds.build();
+                    }
+                }
+            }
+
+            onKeyPress("1", () => build("turret"));
+            onKeyPress("2", () => build("wall"));
+            onKeyPress("3", () => build("trap"));
+
+            // Turret AI
+            onUpdate("turret", (t) => {
+                t.timer += dt();
+                if (t.timer >= t.fireRate) {
+                    const enemies = get("enemy");
+                    if (enemies.length > 0) {
+                        let closest = enemies[0];
+                        let minDist = t.pos.dist(closest.pos);
+                        for (let e of enemies) {
+                            const d = t.pos.dist(e.pos);
+                            if (d < minDist) {
+                                minDist = d;
+                                closest = e;
+                            }
+                        }
+
+                        if (minDist < 350) {
+                            t.timer = 0;
+                            const dir = closest.pos.sub(t.pos).unit();
+                            add([
+                                rect(12, 4),
+                                pos(t.pos),
+                                color(255, 255, 0),
+                                area(),
+                                rotate(dir.angle()),
+                                move(dir, 600),
+                                offscreen({ destroy: true }),
+                                "bullet",
+                            ]);
+                            sounds.shoot();
+                        }
+                    }
+                }
+            });
+
+            onCollide("bullet", "enemy", (b, e) => {
+                destroy(b);
+                destroy(e);
+                createExplosion(e.pos);
+                sounds.explode();
+            });
+
+            onCollide("trap", "enemy", (t, e) => {
+                destroy(t);
+                destroy(e);
+                createExplosion(e.pos);
+                sounds.explode();
+            });
+
+            function createExplosion(p) {
+                const expl = add([
+                    sprite("explosion"),
+                    pos(p),
+                    scale(0.1),
+                    anchor("center"),
+                    opacity(1),
+                ]);
+                onUpdate(() => {
+                    expl.opacity -= dt() * 3;
+                    expl.scale = expl.scale.add(vec2(dt() * 0.2));
+                    if (expl.opacity <= 0) destroy(expl);
+                });
+            }
+
+            // Enemy & Wave Management
+            function spawnEnemy() {
+                const side = choose(["top", "bottom", "left", "right"]);
+                let spawnPos;
+                if (side === "top") spawnPos = vec2(rand(0, width()), -50);
+                if (side === "bottom") spawnPos = vec2(rand(0, width()), height() + 50);
+                if (side === "left") spawnPos = vec2(-50, rand(0, height()));
+                if (side === "right") spawnPos = vec2(width() + 50, rand(0, height()));
+
+                add([
+                    sprite("enemy"),
+                    pos(spawnPos),
+                    scale(0.12),
+                    area(),
+                    anchor("center"),
+                    "enemy",
+                    {
+                        speed: 80 + currentWave * 5,
+                        hp: 1 + Math.floor(currentWave / 2),
+                    }
+                ]);
+                enemiesSpawned++;
+            }
+
+            const waveLabel = add([
+                text("WAVE 1", { size: 48 }),
+                pos(width() / 2, height() / 2 - 100),
+                anchor("center"),
+                opacity(0),
+                fixed(),
+            ]);
+
+            function startWave() {
+                waveState = "warning";
+                enemiesInWave = 5 + currentWave * 3;
+                enemiesSpawned = 0;
+                waveLabel.text = "WAVE " + currentWave;
+                tween(0, 1, 0.5, (v) => waveLabel.opacity = v, easings.easeOutQuad);
+                sounds.waveStart();
+
+                wait(2, () => {
+                    tween(1, 0, 0.5, (v) => waveLabel.opacity = v, easings.easeInQuad);
+                    waveState = "action";
+                    spawnLoop();
+                });
+            }
+
+            function spawnLoop() {
+                if (enemiesSpawned < enemiesInWave && waveState === "action") {
+                    spawnEnemy();
+                    wait(rand(1.5, 3.0) / (1 + currentWave * 0.1), spawnLoop);
+                }
+            }
+
+            onUpdate(() => {
+                if (waveState === "action" && enemiesSpawned >= enemiesInWave && get("enemy").length === 0) {
+                    waveState = "rest";
+                    const victoryLabel = add([
+                        text("WAVE CLEAR!", { size: 32 }),
+                        pos(width() / 2, height() / 2 - 50),
+                        anchor("center"),
+                    ]);
+                    wait(3, () => {
+                        destroy(victoryLabel);
+                        currentWave++;
+                        startWave();
+                    });
+                }
+            });
+
+            startWave();
+
+            onUpdate("enemy", (e) => {
+                const dir = girl.pos.sub(e.pos).unit();
+                e.move(dir.scale(e.speed));
+            });
+
+            onCollide("enemy", "girl", (e, g) => {
+                destroy(e);
+                g.hp -= 15;
+                girlHpFill.width = Math.max(0, (g.hp / g.maxHp) * 100);
+                shake(15);
+                sounds.damage();
+                if (g.hp <= 0) go("gameover");
+            });
+
+            onCollide("enemy", "building", (e, b) => {
+                destroy(e);
+                b.hp -= 30;
+                shake(5);
+                if (b.hp <= 0) destroy(b);
+            });
+
+            // UI
+            const ui = add([
+                rect(width(), 80),
+                pos(0, 0),
+                color(10, 10, 30, 0.8),
+                fixed(),
+                z(100),
+            ]);
+            ui.add([
+                rect(width(), 2),
+                pos(0, 78),
+                color(0, 255, 100, 0.5),
+            ]);
+            const scrapLabel = ui.add([
+                text("SCRAP: 0", { size: 24, font: "monospace" }),
+                pos(20, 20),
+                color(0, 255, 255),
+            ]);
+            ui.add([
+                text("1: TURRET (3) | 2: WALL (1) | 3: TRAP (1)", { size: 14, font: "monospace" }),
+                pos(220, 35),
+                color(200, 200, 200),
+            ]);
+
+            const waveCounterLabel = ui.add([
+                text("WAVE: 1", { size: 24, font: "monospace" }),
+                pos(150, 20),
+                anchor("topright"), // Dummy anchor adjustment
+            ]);
+            // Fix position
+            waveCounterLabel.pos = vec2(width() - 20, 20);
+            waveCounterLabel.anchor = "topright";
+
+            add([
+                text("CORE INTEGRITY", { size: 12, font: "monospace" }),
+                pos(width() / 2, height() / 2 - 75),
+                anchor("center"),
+                color(0, 255, 100),
+            ]);
+
+            onUpdate(() => {
+                scrapLabel.text = "SCRAP: " + player.scrapCount;
+                waveCounterLabel.text = "WAVE: " + currentWave;
+            });
+        });
+
+        scene("gameover", () => {
+            add([
+                text("GUARDIAN FAILED", { size: 50 }),
+                pos(width() / 2, height() / 2 - 50),
+                anchor("center"),
+            ]);
+            add([
+                text("Press any key to retry", { size: 20 }),
+                pos(width() / 2, height() / 2 + 50),
+                anchor("center"),
+            ]);
+            onKeyPress(() => go("start"));
+        });
+
+        go("start");
+    </script>
+</body>
+
+</html>

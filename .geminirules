@@ -1,0 +1,26 @@
+# Guardian Automata Project Rules
+
+## Image Assets
+- NEVER inject image data as Base64 strings directly into HTML, JS, or Python files unless explicitly requested.
+- ALWAYS process images, save them as `.png` files in the `assets/` folder, and reference them via relative paths (e.g., `assets/image.png`).
+- 画像生成を行う場合、背景を透過する。
+
+## Session Startup
+- ALWAYS read `handover_memo.md` (or any progress/memo files in the root) at the beginning of EVERY session to understand the current progress, context, and any specific instructions from the USER.
+- Update `handover_memo.md` or `task.md` whenever significant progress is made to ensure continuity.
+- ALWAYS refer to `docs/api_list.md` for the current public API (exported functions) of the modular code, and keep this list updated when modifying exports.
+- ALWAYS include `console.assert` at the beginning of functions to validate input arguments.
+- ALWAYS ensure that errors (assertion failures or exceptions) are displayed as red text warnings on the game screen.
+
+## Code Structure
+- Keep `index.html` as clean and readable as possible.
+- 常にファイルを適切に分割・最適化し、洗練された（クリーンで保守性の高い）コードを心がける。
+- 後ほどのデバッグを容易にし、トークン消費を抑えるため、冗長さを排した効率的なプログラミングを心がける。
+- バグを修正する際、エンバグを発生させないように慎重に修正を行う。
+- バグを修正する際、丁寧にログを見直す
+
+## Communication
+- ユーザーとの対話は日本語で行う。
+- 思考がループする場合や実装が難しい場合、作業を止めて早めにユーザーに指示を仰ぐ。
+- ファイルを安易に削除しない。
+- ファイルを削除する必要がある場合は、必ず事前に日本語でユーザーに判断を仰ぎ、許可を得る。
