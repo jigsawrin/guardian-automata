@@ -9,13 +9,18 @@ import { initDebugUI } from './debug.js';
 
 initDebugUI();
 
+// Orientation detection for Mobile Portrait support
+const isMobile = window.innerWidth < 800 || (window.innerHeight > window.innerWidth);
+const viewWidth = isMobile ? 360 : MAP_WIDTH;
+const viewHeight = isMobile ? 640 : MAP_HEIGHT;
+
 kaboom({
     background: [10, 10, 15],
-    width: MAP_WIDTH,
-    height: MAP_HEIGHT,
+    width: viewWidth,
+    height: viewHeight,
     letterbox: true,
     texFilter: "nearest",
-    pixelDensity: window.devicePixelRatio, // High-DPI support
+    pixelDensity: window.devicePixelRatio, // Retina support
 });
 
 // Load Sprites
@@ -281,8 +286,15 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             }
         }
 
-        player.pos.x = Math.max(60, Math.min(width() - 60, player.pos.x));
-        player.pos.y = Math.max(130, Math.min(height() - 130, player.pos.y));
+        // Follower Camera for Mobile
+        if (isMobile) {
+            const cx = Math.max(width() / 2, Math.min(MAP_WIDTH - width() / 2, player.pos.x));
+            const cy = Math.max(height() / 2, Math.min(MAP_HEIGHT - height() / 2, player.pos.y));
+            camPos(cx, cy);
+        }
+
+        player.pos.x = Math.max(60, Math.min(MAP_WIDTH - 60, player.pos.x));
+        player.pos.y = Math.max(130, Math.min(MAP_HEIGHT - 130, player.pos.y));
 
         if (gameState.turretCooldownTimer > 0) gameState.turretCooldownTimer -= dt();
         if (gameState.jammingTimer > 0) gameState.jammingTimer -= dt();
@@ -308,6 +320,58 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     });
 
     onDraw(() => {
+        // Mobile MINI-MAP Support
+        if (isMobile) {
+            const mapW = 100;
+            const mapH = 56;
+            const pad = 12;
+            const screenTopLeft = camPos().sub(width() / 2, height() / 2);
+            const mX = screenTopLeft.x + width() - mapW - pad;
+            const mY = screenTopLeft.y + 80;
+
+            // Map Background
+            drawRect({
+                width: mapW,
+                height: mapH,
+                pos: vec2(mX, mY),
+                color: rgb(0, 0, 0),
+                opacity: 0.6,
+                outline: { color: rgb(0, 255, 255), width: 1 },
+                z: 2000
+            });
+
+            const s = mapW / MAP_WIDTH;
+
+            // Enemies (Red)
+            get("enemy").forEach(e => {
+                drawCircle({
+                    pos: vec2(mX + e.pos.x * s, mY + e.pos.y * s),
+                    radius: 1.5,
+                    color: rgb(255, 50, 50),
+                    z: 2001
+                });
+            });
+
+            // Core (Blue)
+            const core = get("girl")[0];
+            if (core) {
+                drawCircle({
+                    pos: vec2(mX + core.pos.x * s, mY + core.pos.y * s),
+                    radius: 2.5,
+                    color: rgb(0, 150, 255),
+                    z: 2002
+                });
+            }
+
+            // Player (Green)
+            drawCircle({
+                pos: vec2(mX + player.pos.x * s, mY + player.pos.y * s),
+                radius: 2.5,
+                color: rgb(0, 255, 100),
+                z: 2003
+            });
+        }
+
         const activeCount = get("turret").length;
         const uiX = width() / 2;
         const uiY = height() - 40;

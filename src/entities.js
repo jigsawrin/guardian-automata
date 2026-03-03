@@ -119,14 +119,14 @@ export function spawnEnemy(gameState, enemiesSpawned) {
     const currentWave = gameState.currentWave;
     console.assert(typeof currentWave === 'number', "spawnEnemy: currentWave must be a number");
     console.assert(typeof enemiesSpawned === 'number', "spawnEnemy: enemiesSpawned must be a number");
-    const spawnPos = vec2(width() + 100, rand(120, height() - 100));
+    const spawnPos = vec2(MAP_WIDTH + 100, rand(140, MAP_HEIGHT - 140));
     let type = "normal";
 
     if (currentWave === 8) {
         const e = add([
             sprite("enemy", { width: 500, height: 500 }),
             color(255, 80, 80),
-            pos(width() + 400, height() / 2),
+            pos(MAP_WIDTH + 400, MAP_HEIGHT / 2),
             area(),
             anchor("center"),
             "enemy",
@@ -409,7 +409,7 @@ export function build(type, player, upgrades, level = 1, spriteName = "turret") 
     for (let s of existingStructures) {
         if (s.pos.dist(buildPos) < 20) return;
     }
-    if (buildPos.x < 20 || buildPos.x > width() - 20 || buildPos.y < 20 || buildPos.y > height() - 20) return;
+    if (buildPos.x < 20 || buildPos.x > MAP_WIDTH - 20 || buildPos.y < 20 || buildPos.y > MAP_HEIGHT - 20) return;
 
     const core = get("girl")[0];
     if (core && buildPos.dist(core.pos) < 60) {
@@ -518,7 +518,7 @@ export function spawnDrone(gameState, sounds) {
             drone.moveTimer = rand(1, 3);
             drone.targetPos = vec2(
                 rand(girl.pos.x + 50, girl.pos.x + 400),
-                rand(height() * 0.2, height() * 0.8)
+                rand(MAP_HEIGHT * 0.2, MAP_HEIGHT * 0.8)
             );
         }
 
