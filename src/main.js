@@ -1,4 +1,4 @@
-import { CONTROLS, TILE_SIZE, MAP_WIDTH, MAP_HEIGHT, CORE_X, ENGAGEMENT_X } from './constants.js';
+import { CONTROLS, TILE_SIZE, MAP_WIDTH, MAP_HEIGHT, CORE_X, ENGAGEMENT_X, GAME_VERSION } from './constants.js';
 import { audioCtx, sounds, playSound } from './audio.js';
 import { highScore, updateHighScore, createExplosion, findPath, updateGridRect } from './utils.js';
 import { spawnEnemy, spawnDrone, spawnHealBot, build, dropResource } from './entities.js';
@@ -142,6 +142,7 @@ scene("start", () => {
     add([sprite("girl"), pos(width() / 2, height() / 2 + 50), scale(0.25), anchor("center")]);
     const startMsg = add([text("PRESS SPACE OR TAP TO INITIALIZE", { size: isMobile ? 16 : 24, font: "monospace" }), pos(width() / 2, height() / 2 + 160), anchor("center")]);
     add([text("BEST RECORD: WAVE " + highScore, { size: 16, font: "monospace" }), pos(width() / 2, height() / 2 + 200), anchor("center"), color(255, 255, 0)]);
+    add([text("ver " + GAME_VERSION, { size: 14, font: "monospace" }), pos(width() / 2, height() - 20), anchor("center"), color(150, 150, 150), fixed()]);
     onUpdate(() => startMsg.opacity = wave(0.3, 1, time() * 5));
     const startGame = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); sounds.waveStart(); go("main", { startWave: 1 }); };
     onKeyPress("space", startGame);
