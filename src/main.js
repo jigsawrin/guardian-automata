@@ -14,6 +14,8 @@ kaboom({
     width: MAP_WIDTH,
     height: MAP_HEIGHT,
     letterbox: true,
+    texFilter: "nearest",
+    pixelDensity: window.devicePixelRatio, // High-DPI support
 });
 
 // Load Sprites

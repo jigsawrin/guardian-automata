@@ -6,15 +6,16 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
     console.assert(gameState && typeof gameState.level === 'number', "showUpgradePicker: gameState must be an object");
     console.assert(Array.isArray(cards), "showUpgradePicker: cards must be an array");
     gameState.paused = true;
+
     // Accurate detection using actual browser window width
     const isMobile = window.innerWidth < 800;
-    const pickerW = isMobile ? width() * 0.95 : 900;
-    const pickerH = isMobile ? height() * 0.9 : 500;
+    const pickerW = isMobile ? width() * 0.98 : 900;
+    const pickerH = isMobile ? height() * 0.95 : 560;
 
     const picker = add([
         rect(pickerW, pickerH),
         pos(width() / 2, height() / 2),
-        color(10, 10, 20, 0.95),
+        color(5, 5, 10, 0.98),
         anchor("center"),
         outline(4, rgb(0, 255, 255)),
         fixed(),
@@ -22,10 +23,11 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
     ]);
 
     picker.add([
-        text("LEVEL UP!", { size: isMobile ? 48 : 32, font: "monospace" }),
-        pos(0, isMobile ? -pickerH / 2 + 60 : -200),
+        text("LEVEL UP!", { size: isMobile ? 54 : 36, font: "monospace" }),
+        pos(0, isMobile ? -pickerH / 2 + 70 : -220),
         anchor("center"),
-        color(0, 255, 255)
+        color(0, 255, 255),
+        outline(2, rgb(0, 0, 0))
     ]);
 
     // Filter cards based on conditions (if any)
@@ -39,12 +41,12 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
     const choices = shuffled.slice(0, 3);
 
     choices.forEach((card, i) => {
-        // Vertical stack for mobile, horizontal for PC
+        // Vertical stack for mobile (more space), horizontal for PC
         const x = isMobile ? 0 : (-300 + i * 300);
-        const y = isMobile ? (-pickerH / 2 + 180 + i * 140) : 20;
+        const y = isMobile ? (-pickerH / 2 + 200 + i * 160) : 40;
 
         const cardW = isMobile ? pickerW - 40 : 260;
-        const cardH = isMobile ? 120 : 350;
+        const cardH = isMobile ? 140 : 380;
 
         const cardBg = picker.add([
             rect(cardW, cardH),
@@ -58,18 +60,20 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
 
         const titleText = typeof card.title === 'function' ? card.title(gameState) : card.title;
         cardBg.add([
-            text(titleText, { size: isMobile ? 24 : 20, width: cardW - 20, font: "monospace" }),
-            pos(isMobile ? -cardW / 2 + 10 : 0, isMobile ? -35 : -120),
+            text(titleText, { size: isMobile ? 28 : 22, width: cardW - 30, font: "monospace" }),
+            pos(isMobile ? -cardW / 2 + 20 : 0, isMobile ? -40 : -130),
             anchor(isMobile ? "left" : "center"),
-            color(255, 255, 255)
+            color(255, 255, 255),
+            outline(2, rgb(0, 0, 0))
         ]);
 
         const descText = typeof card.desc === 'function' ? card.desc(gameState) : card.desc;
         cardBg.add([
-            text(descText, { size: isMobile ? 18 : 14, width: cardW - 20, font: "monospace" }),
-            pos(isMobile ? -cardW / 2 + 10 : 0, isMobile ? 15 : 0),
+            text(descText, { size: isMobile ? 20 : 16, width: cardW - 30, font: "monospace" }),
+            pos(isMobile ? -cardW / 2 + 20 : 0, isMobile ? 20 : 0),
             anchor(isMobile ? "left" : "center"),
-            color(200, 200, 200)
+            color(200, 200, 200),
+            outline(1, rgb(0, 0, 0))
         ]);
 
         cardBg.onHover(() => {
