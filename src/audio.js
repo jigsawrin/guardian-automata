@@ -14,6 +14,12 @@ export function playSound(freq, duration, type = "sine", volume = 0.1, freqEnd =
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
+        
+        osc.onended = () => {
+            osc.disconnect();
+            gain.disconnect();
+        };
+
         osc.start();
         osc.stop(audioCtx.currentTime + duration);
     } catch (e) {

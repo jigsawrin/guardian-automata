@@ -322,6 +322,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     // Movement Loop
     onUpdate(() => {
+        const delta = Math.min(dt(), 0.1);
         if (gameState.paused) return;
         const s = player.speed;
         if (isKeyDown(CONTROLS.MOVE_UP)) { player.move(0, -s); player.targetPos = null; }
@@ -359,11 +360,11 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         player.pos.x = Math.max(40, Math.min(MAP_WIDTH - 40, player.pos.x));
         player.pos.y = Math.max(marginYTop, Math.min(MAP_HEIGHT - marginYBot, player.pos.y));
 
-        if (gameState.turretCooldownTimer > 0) gameState.turretCooldownTimer -= dt();
-        if (gameState.jammingTimer > 0) gameState.jammingTimer -= dt();
+        if (gameState.turretCooldownTimer > 0) gameState.turretCooldownTimer -= delta;
+        if (gameState.jammingTimer > 0) gameState.jammingTimer -= delta;
 
         if (gameState.phase === "day" && !gameState.paused) {
-            gameState.dayTimer -= dt();
+            gameState.dayTimer -= delta;
             if (gameState.dayTimer <= 0) systems.startNight();
         } else if (gameState.phase === "night" && gameState.enemiesSpawned >= gameState.enemiesInWave && get("enemy").length === 0) {
             gameState.phase = "transition";
@@ -687,11 +688,21 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
         const corePos = vec2(CORE_X, MAP_HEIGHT / 2);
         if (e.is("ranged") && e.pos.dist(corePos) < e.stopDistance) {
-            e.reloadTimer -= dt();
-            if (e.reloadTimer <= 0) { spawnMortar(e.pos, corePos, girl, girlHpFill, () => go("gameover", { finalWave: gameState.currentWave })); e.reloadTimer = 5.0; }
+            if (!gameState.paused) {
+                e.reloadTimer -= delta;
+                if (e.reloadTimer <= 0) { 
+                    spawnMortar(e.pos, corePos, girl, girlHpFill, () => go("gameover", { finalWave: gameState.currentWave })); 
+                    e.reloadTimer = 5.0; 
+                }
+            }
             return;
         }
-        if (e.is("boss")) { e.stepTimer += dt(); if (e.stepTimer >= 1.2) { sounds.bossStep(); e.stepTimer = 0; } }
+        if (e.is("boss")) { 
+            if (!gameState.paused) {
+                e.stepTimer += delta; 
+                if (e.stepTimer >= 1.2) { sounds.bossStep(); e.stepTimer = 0; } 
+            }
+        }
 
         if (!gameState.paused) {
             const moveDir = dir.unit();
@@ -711,6 +722,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     });
 
     onCollide("enemy", "building", (e, b) => {
+        if (gameState.paused) return;
         if (b.is("turret")) {
             let damage = 1;
             if (e.is("assassin")) damage = b.maxHp * 0.8;
@@ -737,6 +749,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     });
 
     onCollide("enemy", "drone", (e, d) => {
+        if (gameState.paused) return;
         d.hp -= 1;
         if (d.hp <= 0) {
             createExplosion(d.pos, gameState.level);
@@ -747,7 +760,10 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     onUpdate("turret", (t) => {
         if (gameState.paused || gameState.jammingTimer > 0) return;
-        t.timer += dt();
+        const delta = Math.min(dt(), 0.1);
+        t.timer += delta;
+        
+        // Final sanity check for Evolution (v3.2.2)
 
         // Visual Evolution: Update sprite based on current level milestone
         const currentSpriteName = getTurretSprite(gameState.level);
@@ -983,7 +999,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     };
 
     onCollide("bullet", "enemy", (b, e) => {
-        if (!b.exists()) return; // Prevent "ghost hits" if bullet destroyed in same frame
+        if (gameState.paused || !b.exists()) return; 
 
         // Calculate effects BEFORE primary damage so they trigger on lethal shots
         const splashEnabled = gameState.upgrades.explosiveRounds > 0 && b.source === "turret";
@@ -1078,6 +1094,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     onKeyPress("p", triggerLevelUp);
 
     onCollide("player", "resource", (p, r) => {
+        if (gameState.paused) return;
         destroy(r);
         sounds.collect();
 

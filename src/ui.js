@@ -93,6 +93,8 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete, is
             cardBg.outline.color = rgb(100, 100, 150);
         });
         cardBg.onClick(() => {
+            if (picker.isClosing) return;
+            picker.isClosing = true;
             card.effect(gameState, player, girl);
             destroy(picker);
             gameState.paused = false;
