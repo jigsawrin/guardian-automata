@@ -882,7 +882,6 @@ export function spawnSonicWave(turret, targetEnemy, gameState) {
             area({ scale: vec2(0.5, 1.2) }), // Wide horizontal hitbox
             move(dir, 600),
             offscreen({ destroy: true }),
-            cleanup(),
             z(110),
             "sonic_wave",
             {
