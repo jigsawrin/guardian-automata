@@ -376,72 +376,19 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
     });
 
-        // Mobile MINI-MAP Support (Fixed UI Space)
-        onDraw(5000, () => {
-            if (!isMobile) return;
-            
-            const mapW = 100;
-            const mapH = 56;
-            const pad = 12;
-            const mX = width() - mapW - pad;
-            const mY = 80;
-
-            // Map Background
-            drawRect({
-                width: mapW,
-                height: mapH,
-                pos: vec2(mX, mY),
-                color: rgb(0, 0, 0),
-                opacity: 0.6,
-                outline: { color: rgb(0, 255, 255), width: 1 },
-                fixed: true
-            });
-
-            const s = mapW / MAP_WIDTH;
-
-            // Enemies (Red)
-            get("enemy").forEach(e => {
-                drawCircle({
-                    pos: vec2(mX + e.pos.x * s, mY + e.pos.y * s),
-                    radius: 1.5,
-                    color: rgb(255, 50, 50),
-                    fixed: true
-                });
-            });
-
-            // Core (Blue)
-            const core = get("girl")[0];
-            if (core) {
-                drawCircle({
-                    pos: vec2(mX + core.pos.x * s, mY + core.pos.y * s),
-                    radius: 2.5,
-                    color: rgb(0, 150, 255),
-                    fixed: true
-                });
-            }
-
-            // Player (Green)
-            drawCircle({
-                pos: vec2(mX + player.pos.x * s, mY + player.pos.y * s),
-                radius: 2.5,
-                color: rgb(0, 255, 100),
-                fixed: true
-            });
-        });
-
-    onDraw(1200, () => {
-
+    onDraw(() => {
+        // --- HUD & Turret UI (Z-Index baseline 1200) ---
         const activeCount = get("turret").length;
         const screenTopLeft = camPos().sub(width() / 2, height() / 2);
         const uiX = screenTopLeft.x + width() / 2;
         const uiY = screenTopLeft.y + height() - 44;
+
         // Turret UI Icon
         drawCircle({
             pos: vec2(uiX - 100, uiY),
             radius: 25,
             color: rgb(40, 40, 60),
             outline: { color: rgb(100, 100, 200), width: 2 },
-            z: 1210
         });
 
         if (gameState.turretCooldownTimer > 0) {
@@ -462,7 +409,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                         pts: pts,
                         color: rgb(0, 255, 255),
                         opacity: 0.6,
-                        z: 1211
                     });
                 } catch (e) {
                     drawCircle({
@@ -470,7 +416,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                         radius: 25 * p,
                         color: rgb(0, 255, 255),
                         opacity: 0.4,
-                        z: 1211
                     });
                 }
             }
@@ -480,7 +425,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 radius: 25,
                 color: rgb(0, 255, 255),
                 opacity: 0.3,
-                z: 1211
             });
         }
 
@@ -490,7 +434,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             width: 40,
             height: 40,
             anchor: "center",
-            z: 112,
             opacity: gameState.turretCooldownTimer > 0 ? 0.5 : 1
         });
 
@@ -501,7 +444,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             anchor: "center",
             font: "monospace",
             color: rgb(255, 255, 255),
-            z: 112,
             outline: { color: rgb(0, 0, 0), width: 1 }
         });
 
@@ -512,7 +454,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             anchor: "left",
             font: "monospace",
             color: activeCount >= gameState.upgrades.maxTurrets ? rgb(255, 50, 50) : rgb(255, 255, 255),
-            z: 112
         });
 
         // Jamming Screen Effect
@@ -525,9 +466,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 color: rgb(200, 200, 255),
                 opacity: op,
                 fixed: true,
-                z: 600
             });
-            // Add some "lines"
             for (let i = 0; i < 5; i++) {
                 drawRect({
                     width: width(),
@@ -536,11 +475,57 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     color: rgb(255, 255, 255),
                     opacity: op * 2,
                     fixed: true,
-                    z: 601
                 });
             }
         }
+
+        // --- MINI-MAP (Drawn LAST to be on top of EVERYTHING) ---
+        if (isMobile) {
+            const mapW = 100;
+            const mapH = 56;
+            const pad = 12;
+            const mX = width() - mapW - pad;
+            const mY = 80;
+
+            drawRect({
+                width: mapW,
+                height: mapH,
+                pos: vec2(mX, mY),
+                color: rgb(0, 0, 0),
+                opacity: 0.6,
+                outline: { color: rgb(0, 255, 255), width: 1 },
+                fixed: true
+            });
+
+            const s = mapW / MAP_WIDTH;
+            get("enemy").forEach(e => {
+                drawCircle({
+                    pos: vec2(mX + e.pos.x * s, mY + e.pos.y * s),
+                    radius: 1.5,
+                    color: rgb(255, 50, 50),
+                    fixed: true
+                });
+            });
+
+            const core = get("girl")[0];
+            if (core) {
+                drawCircle({
+                    pos: vec2(mX + core.pos.x * s, mY + core.pos.y * s),
+                    radius: 2.5,
+                    color: rgb(0, 150, 255),
+                    fixed: true
+                });
+            }
+
+            drawCircle({
+                pos: vec2(mX + player.pos.x * s, mY + player.pos.y * s),
+                radius: 2.5,
+                color: rgb(0, 255, 100),
+                fixed: true
+            });
+        }
     });
+
 
     // Touch / Mouse Controls
     onClick(() => {
@@ -1051,7 +1036,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         waveCounterLabel.text = "WAVE: " + gameState.currentWave;
 
         if (gameState.phase === "day") {
-            dayTimerLabel.text = "NEXT WAVE IN: " + Math.ceil(gameState.dayTimer) + "s";
+            dayTimerLabel.text = "NEXT: " + Math.ceil(gameState.dayTimer) + "s";
         } else {
             dayTimerLabel.text = "";
         }
