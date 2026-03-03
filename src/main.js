@@ -995,6 +995,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                         destroy(t);
                         return;
                     }
+                        }
+                    }
                 }
             }
         }
