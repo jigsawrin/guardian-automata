@@ -244,7 +244,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     ]);
 
     const systems = createSystems(gameState);
-    gameState.phaseLabel = add([text("DAY", { size: 48, font: "monospace" }), pos(width() / 2, height() / 2 - 100), anchor("center"), opacity(0), fixed(), z(1100)]);
+    gameState.phaseLabel = add([text("DAY", { size: isMobile ? 28 : 48, font: "monospace", width: width() - 20 }), pos(width() / 2, height() / 2 - 100), anchor("center"), opacity(0), fixed(), z(1100)]);
 
     gameState.phaseIndicator = add([
         text("1日目：昼", { size: isMobile ? 22 : 32, font: "monospace" }),

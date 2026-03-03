@@ -93,39 +93,37 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
     });
 }
 
-export function showBanner(bannerTextContent, bgColor, onFinish) {
-    console.assert(typeof bannerTextContent === 'string', "showBanner: bannerTextContent must be a string");
-    console.assert(bgColor && typeof bgColor.r === 'number', "showBanner: bgColor must be a color object");
-    const bannerBg = add([
-        rect(width(), 100),
-        pos(width(), height() / 2 - 50),
-        color(bgColor),
-        opacity(0.6),
-        fixed(),
-        z(1000)
-    ]);
-    const bannerText = add([
-        text(bannerTextContent, { size: 48, font: "monospace" }),
-        pos(width(), height() / 2),
-        anchor("center"),
-        color(255, 255, 255),
-        fixed(),
-        z(1001)
-    ]);
+const isMobile = window.innerHeight > window.innerWidth;
+const bannerBg = add([
+    rect(width(), isMobile ? 60 : 100),
+    pos(width(), height() / 2 - (isMobile ? 30 : 50)),
+    color(bgColor),
+    opacity(0.6),
+    fixed(),
+    z(1000)
+]);
+const bannerText = add([
+    text(bannerTextContent, { size: isMobile ? 24 : 48, font: "monospace", width: width() - 40 }),
+    pos(width(), height() / 2),
+    anchor("center"),
+    color(255, 255, 255),
+    fixed(),
+    z(1001)
+]);
 
-    tween(width(), width() / 2, 0.5, (v) => {
-        bannerBg.pos.x = v - width() / 2;
-        bannerText.pos.x = v;
-    }, easings.easeOutQuad).onEnd(() => {
-        wait(1, () => {
-            tween(width() / 2, -width(), 0.5, (v) => {
-                bannerBg.pos.x = v - width() / 2;
-                bannerText.pos.x = v;
-            }, easings.easeInQuad).onEnd(() => {
-                destroy(bannerBg);
-                destroy(bannerText);
-                if (onFinish) onFinish();
-            });
+tween(width(), width() / 2, 0.5, (v) => {
+    bannerBg.pos.x = v - width() / 2;
+    bannerText.pos.x = v;
+}, easings.easeOutQuad).onEnd(() => {
+    wait(1, () => {
+        tween(width() / 2, -width(), 0.5, (v) => {
+            bannerBg.pos.x = v - width() / 2;
+            bannerText.pos.x = v;
+        }, easings.easeInQuad).onEnd(() => {
+            destroy(bannerBg);
+            destroy(bannerText);
+            if (onFinish) onFinish();
         });
     });
+});
 }
