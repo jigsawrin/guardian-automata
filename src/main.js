@@ -197,6 +197,8 @@ scene("start", () => {
 });
 
 scene("main", ({ startWave } = { startWave: 1 }) => {
+    let delta = 0;
+    onUpdate(() => { delta = Math.min(dt(), 0.1); });
     gameState.currentWave = startWave;
     add([sprite("wide_map", { width: MAP_WIDTH, height: MAP_HEIGHT }), pos(0, 0), z(-1)]);
 
@@ -324,7 +326,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     // Movement Loop
     onUpdate(() => {
-        const delta = Math.min(dt(), 0.1);
         if (gameState.paused) return;
         const s = player.speed;
         if (isKeyDown(CONTROLS.MOVE_UP)) { player.move(0, -s); player.targetPos = null; }
