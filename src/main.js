@@ -182,9 +182,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     // Components (Anchored to World Y for AI stability)
     const girlY = MAP_HEIGHT / 2;
     const girl = add([sprite("girl"), pos(CORE_X, girlY), scale(0.25), area(), anchor("center"), z(90), "girl", { hp: 100, maxHp: 100 }]);
-    const girlHpBar = add([rect(100, 10), pos(CORE_X, girlY - 70), color(50, 50, 50), outline(2), anchor("center"), z(110)]);
-    const girlHpFill = girlHpBar.add([rect(100, 10), pos(-50, -5), color(0, 255, 100), anchor("topleft"), z(110)]);
-    add([text("シールド耐久値", { size: 14, font: "monospace" }), pos(CORE_X, girlY - 85), anchor("center"), color(0, 255, 100), z(115)]);
+    const girlHpBar = add([rect(100, 10), pos(CORE_X, girlY - 70), color(50, 50, 50), outline(2), anchor("center"), z(1300)]);
+    const girlHpFill = girlHpBar.add([rect(100, 10), pos(-50, -5), color(0, 255, 100), anchor("topleft"), z(1301)]);
+    add([text("シールド耐久値", { size: 14, font: "monospace" }), pos(CORE_X, girlY - 85), anchor("center"), color(0, 255, 100), z(1302)]);
 
     const player = add([
         sprite("player", { width: 80, height: 80 }),
@@ -207,7 +207,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         pos(0, 80),
         color(30, 30, 50),
         fixed(),
-        z(100)
+        z(1000)
     ]);
     const xpBarFill = xpBarBg.add([
         rect(0, 8),
@@ -220,7 +220,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         pos(0, height() - 88),
         color(30, 30, 50),
         fixed(),
-        z(100)
+        z(1000)
     ]);
 
     const hudLevel = add([
@@ -228,7 +228,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         pos(isMobile ? 10 : 20, isMobile ? 15 : 68),
         anchor("left"),
         fixed(),
-        z(500),
+        z(1100),
         color(255, 255, 255),
         outline(2, rgb(0, 0, 0))
     ]);
@@ -238,20 +238,20 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         pos(isMobile ? width() / 2 : width() - 20, isMobile ? 55 : 65),
         anchor(isMobile ? "center" : "right"),
         fixed(),
-        z(500),
+        z(1100),
         color(255, 255, 0),
         outline(2, rgb(0, 0, 0))
     ]);
 
     const systems = createSystems(gameState);
-    gameState.phaseLabel = add([text("DAY", { size: 48, font: "monospace" }), pos(width() / 2, height() / 2 - 100), anchor("center"), opacity(0), fixed(), z(200)]);
+    gameState.phaseLabel = add([text("DAY", { size: 48, font: "monospace" }), pos(width() / 2, height() / 2 - 100), anchor("center"), opacity(0), fixed(), z(1100)]);
 
     gameState.phaseIndicator = add([
         text("1日目：昼", { size: isMobile ? 22 : 32, font: "monospace" }),
         pos(width() / 2, isMobile ? 15 : 40),
         anchor("center"),
         fixed(),
-        z(500),
+        z(1100),
         color(0, 255, 100),
         outline(3, rgb(0, 0, 0))
     ]);
@@ -261,7 +261,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         pos(width() - 10, isMobile ? 15 : 40),
         anchor("right"),
         fixed(),
-        z(500),
+        z(1100),
         color(255, 255, 255),
         outline(2, rgb(0, 0, 0))
     ]);
@@ -392,7 +392,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             radius: 25,
             color: rgb(40, 40, 60),
             outline: { color: rgb(100, 100, 200), width: 2 },
-            z: 110
+            z: 1210
         });
 
         if (gameState.turretCooldownTimer > 0) {
@@ -413,7 +413,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                         pts: pts,
                         color: rgb(0, 255, 255),
                         opacity: 0.6,
-                        z: 111
+                        z: 1211
                     });
                 } catch (e) {
                     drawCircle({
@@ -421,7 +421,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                         radius: 25 * p,
                         color: rgb(0, 255, 255),
                         opacity: 0.4,
-                        z: 111
+                        z: 1211
                     });
                 }
             }
@@ -431,7 +431,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 radius: 25,
                 color: rgb(0, 255, 255),
                 opacity: 0.3,
-                z: 111
+                z: 1211
             });
         }
 
