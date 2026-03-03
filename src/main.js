@@ -978,25 +978,23 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
                                 const speed = b.homing > 0 ? (b.circus ? 850 : 750) : 1100;
                                 b.move(b.dir.scale(speed));
-                            });
-                        }
-                    }
+                            }); // End b.onUpdate
+                        } // End for subShots
+                    } // End for shots
+                } // End if (closest)
 
-                    sounds.shoot();
+                sounds.shoot();
 
-                    // Consume HP per shot (restored lifetime mechanic)
-                    t.hp -= 1;
-                    const hpbar = t.get("hpbar")[0];
-                    if (hpbar) hpbar.width = (t.hp / t.maxHp) * 40;
+                // Consume HP per shot (restored lifetime mechanic)
+                t.hp -= 1;
+                const hpbar = t.get("hpbar")[0];
+                if (hpbar) hpbar.width = (t.hp / t.maxHp) * 40;
 
-                    if (t.hp <= 0) {
-                        createExplosion(firePos, gameState.level);
-                        sounds.explode(gameState.level);
-                        destroy(t);
-                        return;
-                    }
-                        }
-                    }
+                if (t.hp <= 0) {
+                    createExplosion(firePos, gameState.level);
+                    sounds.explode(gameState.level);
+                    destroy(t);
+                    return;
                 }
             }
         }
