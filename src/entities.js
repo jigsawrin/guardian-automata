@@ -444,7 +444,8 @@ export function build(type, player, upgrades, level = 1, spriteName = "turret") 
                 firstShot: true, // v3.2.5 feature
                 range: range,
                 dmg: dmg,
-                bcol: bcol
+                bcol: bcol,
+                sonicTimer: 5.0,
             }
         ]);
         t.add([
@@ -848,10 +849,73 @@ export function spawnMeteor(gameState, sounds) {
                 move(diff.unit().scale(-0.5), 100),
                 z(149),
                 "particle"
-            ]).onUpdate(function() {
-                this.opacity -= dt() * 3;
-                if (this.opacity <= 0) destroy(this);
             });
         }
     });
+}
+
+export function spawnSonicWave(turret, targetEnemy, gameState) {
+    if (!turret.exists()) return;
+    
+    const count = gameState.upgrades.sonicWaveLvl || 1;
+    const targetPos = targetEnemy ? targetEnemy.pos : turret.pos.add(vec2(500, 0));
+    const dir = targetPos.sub(turret.pos).unit();
+
+    for (let i = 0; i < count; i++) {
+        // Offset for multiple waves
+        const offset = (i - (count - 1) / 2) * 40;
+        const sideDir = vec2(-dir.y, dir.x).scale(offset);
+        const spawnPos = turret.pos.add(sideDir);
+
+        const wave = add([
+            // Using a stylized ')' for the crescent shape
+            text(")", { size: 100, font: "monospace" }),
+            pos(spawnPos),
+            rotate(Math.atan2(dir.y, dir.x) * 180 / Math.PI),
+            anchor("center"),
+            color(200, 100, 255),
+            opacity(0.8),
+            outline(4, rgb(255, 255, 255)),
+            area({ scale: vec2(0.5, 1.2) }), // Wide horizontal hitbox
+            move(dir, 600),
+            offscreen({ destroy: true }),
+            cleanup(),
+            z(110),
+            "sonic_wave",
+            {
+                dmg: 5 + (gameState.upgrades.turretDmgMod * 2),
+                hitEnemies: new Set()
+            }
+        ]);
+
+        // Add glow
+        wave.add([
+            text(")", { size: 110, font: "monospace" }),
+            anchor("center"),
+            color(255, 255, 255),
+            opacity(0.3),
+            z(-1)
+        ]);
+
+        wave.onUpdate(() => {
+            if (gameState.paused) return;
+            wave.opacity = wave(0.4, 0.8, time() * 10);
+            
+            // PIERCING COLLISION: Manually check against frame enemies or use onCollide
+            // For simplicity and multi-hit prevention, we use a custom check
+            const enemies = get("enemy");
+            enemies.forEach(e => {
+                if (wave.hitEnemies.has(e.id)) return;
+                if (wave.isColliding(e)) {
+                    wave.hitEnemies.add(e.id);
+                    e.hp -= wave.dmg;
+                    if (e.hp <= 0) {
+                        createExplosion(e.pos, gameState.level);
+                        destroy(e);
+                    }
+                    shake(2);
+                }
+            });
+        });
+    }
 }

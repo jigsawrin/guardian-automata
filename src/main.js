@@ -1,7 +1,7 @@
 import { CONTROLS, TILE_SIZE, MAP_WIDTH, MAP_HEIGHT, CORE_X, ENGAGEMENT_X, GAME_VERSION } from './constants.js';
 import { audioCtx, sounds, playSound } from './audio.js';
 import { highScore, updateHighScore, createExplosion, findPath, updateGridRect } from './utils.js';
-import { spawnEnemy, spawnDrone, spawnHealBot, spawnDecoy, spawnMeteor, build, dropResource } from './entities.js';
+import { spawnEnemy, spawnDrone, spawnHealBot, spawnDecoy, spawnMeteor, build, dropResource, spawnSonicWave } from './entities.js';
 import { createSystems } from './systems.js';
 import { showBanner, showUpgradePicker } from './ui.js';
 import { UPGRADE_CARDS } from './cards.js';
@@ -121,6 +121,8 @@ function getInitialGameState() {
             omegaStrike: 0,
             holographicDecoy: 0,
             meteorFall: 0,
+            sonicWave: 0,
+            sonicWaveLvl: 0,
         },
         activeTurrets: 0,
         turretCooldownTimer: 0,
@@ -845,7 +847,22 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         const delta = Math.min(dt(), 0.1);
         t.timer += delta;
         
-        // Final sanity check for Evolution (v3.2.2)
+        // Sonic Wave Logic (v3.6.0)
+        if (gameState.upgrades.sonicWave > 0) {
+            t.sonicTimer = (t.sonicTimer || 5.0) - delta;
+            if (t.sonicTimer <= 0) {
+                t.sonicTimer = 5.0;
+                // Find target for sonic wave (closest enemy)
+                let sonicTarget = null;
+                let sonicMinDist = 1000;
+                for (const e of frameEnemies) {
+                    const d = t.pos.dist(e.pos);
+                    if (d < sonicMinDist) { sonicMinDist = d; sonicTarget = e; }
+                }
+                spawnSonicWave(t, sonicTarget, gameState);
+                sounds.laser(); // Reuse laser sound for sonic wave or similar
+            }
+        }
 
         // Visual Evolution: Update sprite based on current level milestone
         const currentSpriteName = getTurretSprite(gameState.level);

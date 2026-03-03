@@ -174,6 +174,27 @@ export const UPGRADE_CARDS = [
         condition: (gs) => gs.level >= 25 && gs.upgrades.holographicDecoy === 0
     },
     {
+        id: "sonic_wave",
+        title: "📡 ソニックウェーブ",
+        desc: "全タレットが 5秒ごとに 巨大な貫通衝撃波を放ちます。衝撃波は敵を追尾します。",
+        isRare: true,
+        effect: (gs) => { 
+            gs.upgrades.sonicWave = 1;
+            gs.upgrades.sonicWaveLvl = 1;
+        },
+        condition: (gs) => gs.level >= 30 && gs.upgrades.sonicWave === 0
+    },
+    {
+        id: "sonic_wave_upgrade",
+        title: (gs) => `📡 ソニックウェーブ Lv.${gs.upgrades.sonicWaveLvl + 1}`,
+        desc: "同時発射される衝撃波の数が増加します。（最大3本）",
+        isRare: true,
+        effect: (gs) => { 
+            gs.upgrades.sonicWaveLvl = Math.min(3, gs.upgrades.sonicWaveLvl + 1);
+        },
+        condition: (gs) => gs.upgrades.sonicWave > 0 && gs.upgrades.sonicWaveLvl < 3 && Math.random() < 0.1
+    },
+    {
         id: "meteor_fall",
         title: "☄️ 【極大魔法】メテオ・フォール",
         desc: "戦場に巨大な隕石を落とし、広範囲の敵を消滅させます。一定周期で自動的に発動します。",
