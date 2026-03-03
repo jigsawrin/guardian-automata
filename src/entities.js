@@ -849,6 +849,9 @@ export function spawnMeteor(gameState, sounds) {
                 move(diff.unit().scale(-0.5), 100),
                 z(149),
                 "particle"
+            ]).onUpdate((p) => {
+                p.opacity -= dt() * 3;
+                if (p.opacity <= 0) destroy(p);
             });
         }
     });
