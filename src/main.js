@@ -376,13 +376,13 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
     });
 
-    onDraw(() => {
         // Mobile MINI-MAP Support (Fixed UI Space)
-        if (isMobile) {
+        onDraw(5000, () => {
+            if (!isMobile) return;
+            
             const mapW = 100;
             const mapH = 56;
             const pad = 12;
-            // Draw in screen-space (no camPos offset)
             const mX = width() - mapW - pad;
             const mY = 80;
 
@@ -394,8 +394,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 color: rgb(0, 0, 0),
                 opacity: 0.6,
                 outline: { color: rgb(0, 255, 255), width: 1 },
-                fixed: true, // Use fixed UI space
-                z: 5000
+                fixed: true
             });
 
             const s = mapW / MAP_WIDTH;
@@ -406,8 +405,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     pos: vec2(mX + e.pos.x * s, mY + e.pos.y * s),
                     radius: 1.5,
                     color: rgb(255, 50, 50),
-                    fixed: true,
-                    z: 5001
+                    fixed: true
                 });
             });
 
@@ -418,8 +416,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     pos: vec2(mX + core.pos.x * s, mY + core.pos.y * s),
                     radius: 2.5,
                     color: rgb(0, 150, 255),
-                    fixed: true,
-                    z: 5002
+                    fixed: true
                 });
             }
 
@@ -428,10 +425,11 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 pos: vec2(mX + player.pos.x * s, mY + player.pos.y * s),
                 radius: 2.5,
                 color: rgb(0, 255, 100),
-                fixed: true,
-                z: 5003
+                fixed: true
             });
-        }
+        });
+
+    onDraw(1200, () => {
 
         const activeCount = get("turret").length;
         const screenTopLeft = camPos().sub(width() / 2, height() / 2);
