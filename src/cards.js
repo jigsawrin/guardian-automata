@@ -170,10 +170,11 @@ export const UPGRADE_CARDS = [
         condition: (gs) => gs.level >= 25 && gs.upgrades.holographicDecoy === 0
     },
     {
-        id: "omega_strike",
-        title: "🔯 【最終兵器】オメガ・ストライク",
-        desc: "タレットの弾丸が全てを超越した巨大な貫通レーザーへと変貌します。",
-        effect: (gs) => { gs.upgrades.omegaStrike = 1; },
-        condition: (gs) => gs.level >= 50 && gs.upgrades.omegaStrike === 0
+        id: "meteor_fall",
+        title: "☄️ 【極大魔法】メテオ・フォール",
+        desc: "戦場に巨大な隕石を落とし、広範囲の敵を消滅させます。一定周期で自動的に発動します。",
+        isOverload: true,
+        effect: (gs) => { gs.upgrades.meteorFall = 1; },
+        condition: (gs) => gs.level >= 50 && gs.upgrades.meteorFall === 0
     },
 ];

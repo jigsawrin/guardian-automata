@@ -757,3 +757,101 @@ export function spawnDecoy(gameState, sounds) {
 
     return d;
 }
+
+export function spawnMeteor(gameState, sounds) {
+    // Target logic: find a random enemy or an area with most enemies
+    const targets = get("enemy");
+    let targetPos;
+    if (targets.length > 0) {
+        const randomEnemy = choose(targets);
+        targetPos = randomEnemy.pos;
+    } else {
+        targetPos = vec2(rand(500, 1100), rand(150, height() - 150));
+    }
+
+    const startPos = targetPos.add(vec2(400, -800)); // Drop from top-right
+
+    const m = add([
+        circle(40),
+        pos(startPos),
+        color(255, 100, 0),
+        outline(8, rgb(255, 255, 255)),
+        anchor("center"),
+        area(),
+        z(150),
+        "meteor",
+        {
+            target: targetPos,
+            speed: 1200,
+            exploded: false
+        }
+    ]);
+
+    // Add trail/glow
+    const glow = m.add([
+        circle(60),
+        color(255, 50, 0),
+        opacity(0.4),
+        anchor("center"),
+        z(-1)
+    ]);
+
+    m.onUpdate(() => {
+        if (gameState.paused) return;
+        const diff = m.target.sub(m.pos);
+        if (diff.len() < 30 && !m.exploded) {
+            m.exploded = true;
+            // Explosion!
+            shake(40);
+            if (sounds.explode) sounds.explode(50); // Ultimate explosion sound
+            
+            // Damage AOE
+            const explosionRadius = 350;
+            const enemies = get("enemy");
+            enemies.forEach(e => {
+                const dist = e.pos.dist(m.pos);
+                if (dist < explosionRadius) {
+                    // Damage falls off with distance but it's very high at center
+                    const dmg = map(dist, 0, explosionRadius, 50, 10);
+                    e.hp -= dmg;
+                    if (e.hp <= 0) {
+                        createExplosion(e.pos, gameState.level);
+                        destroy(e);
+                    }
+                }
+            });
+
+            // Visual effect
+            const exp = add([
+                circle(10),
+                pos(m.pos),
+                color(255, 200, 0),
+                opacity(1),
+                anchor("center"),
+                z(200)
+            ]);
+            exp.onUpdate(() => {
+                exp.radius += dt() * 1200;
+                exp.opacity -= dt() * 1.5;
+                if (exp.opacity <= 0) destroy(exp);
+            });
+
+            destroy(m);
+        } else {
+            m.move(diff.unit().scale(m.speed));
+            // Add particles
+            add([
+                circle(rand(5, 15)),
+                pos(m.pos.add(vec2(rand(-20, 20), rand(-20, 20)))),
+                color(255, rand(50, 150), 0),
+                opacity(0.8),
+                move(diff.unit().scale(-0.5), 100),
+                z(149),
+                "particle"
+            ]).onUpdate(function() {
+                this.opacity -= dt() * 3;
+                if (this.opacity <= 0) destroy(this);
+            });
+        }
+    });
+}

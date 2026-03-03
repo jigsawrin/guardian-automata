@@ -1,7 +1,7 @@
 import { CONTROLS, TILE_SIZE, MAP_WIDTH, MAP_HEIGHT, CORE_X, ENGAGEMENT_X, GAME_VERSION } from './constants.js';
 import { audioCtx, sounds, playSound } from './audio.js';
 import { highScore, updateHighScore, createExplosion, findPath, updateGridRect } from './utils.js';
-import { spawnEnemy, spawnDrone, spawnHealBot, build, dropResource } from './entities.js';
+import { spawnEnemy, spawnDrone, spawnHealBot, spawnDecoy, spawnMeteor, build, dropResource } from './entities.js';
 import { createSystems } from './systems.js';
 import { showBanner, showUpgradePicker } from './ui.js';
 import { UPGRADE_CARDS } from './cards.js';
@@ -119,7 +119,7 @@ const gameState = {
         orbitingProjectiles: 0,
         omegaStrike: 0,
         holographicDecoy: 0,
-        roboCircus: 0,
+        meteorFall: 0,
     },
     activeTurrets: 0,
     turretCooldownTimer: 0,
@@ -127,6 +127,7 @@ const gameState = {
     xp: 0,
     level: 1,
     xpToNext: 10,
+    meteorTimer: 10, // First meteor comes soon after picking
     paused: false,
     jammingTimer: 0,
     spawnedEnemyTypes: [],
@@ -1320,6 +1321,15 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (hLevel !== lastHealBotLevel) {
             lastHealBotLevel = hLevel;
             if (hLevel > 0) spawnHealBot(gameState, sounds);
+        }
+
+        // Meteor Fall Logic
+        if (gameState.upgrades.meteorFall > 0 && gameState.phase === "night") {
+            gameState.meteorTimer -= dt();
+            if (gameState.meteorTimer <= 0) {
+                gameState.meteorTimer = 18; // 18 seconds interval
+                spawnMeteor(gameState, sounds);
+            }
         }
     });
 
