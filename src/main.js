@@ -738,9 +738,28 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
         const engX = e.is("boss") ? (e.pos.x - 250) : e.pos.x;
         if (engX <= ENGAGEMENT_X) {
-            if (e.is("boss")) girl.hp = 0; else girl.hp -= 15;
             shake(20); sounds.damage(); createExplosion(e.pos, gameState.level); sounds.explode(gameState.level); destroy(e);
             if (girl.hp <= 0) go("gameover", { finalWave: gameState.currentWave });
+        }
+    });
+
+    onCollide("enemy", "decoy", (e, d) => {
+        if (gameState.paused) return;
+        
+        // Damage scaling: Heavy/Boss = 3, Others = 1
+        const damage = (e.is("heavy") || e.is("boss")) ? 3 : 1;
+        
+        d.hp -= damage;
+        
+        // Enemy effects
+        createExplosion(e.pos, gameState.level);
+        sounds.explode(gameState.level);
+        destroy(e);
+        
+        if (d.hp <= 0) {
+            createExplosion(d.pos, gameState.level);
+            sounds.explode();
+            destroy(d);
         }
     });
 
