@@ -86,52 +86,56 @@ export function getTurretSprite(level) {
     return "turret_lvl1";
 }
 
-// Game State Class/Object
-const gameState = {
-    currentWave: 1,
-    phase: "day",
-    dayTimer: 0,
-    enemiesInWave: 0,
-    enemiesSpawned: 0,
-    currentBgm: null,
-    upgrades: {
-        pickupRadius: 100,
-        pickupRadiusMod: 1.0,
-        chainLightning: 0,
-        explosiveRounds: 0,
-        bulletSizeMod: 1.0,
-        maxTurrets: 3,
-        turretCooldown: 5.0,
-        turretCooldownMod: 1.0,
-        pierce: 0,
-        multiShot: 0,
-        homing: 0,
-        critChance: 0,
-        turretHpMod: 1.0,
-        turretFireRateMod: 1.0,
-        turretRangeMod: 1.0,
-        turretDmgMod: 1.0,
-        roboCircus: 0,
-        ricochet: 0,
-        drone: 0,
-        droneLvl: 0,
-        healBot: 0,
-        orbitingProjectiles: 0,
-        omegaStrike: 0,
-        holographicDecoy: 0,
-        meteorFall: 0,
-    },
-    activeTurrets: 0,
-    turretCooldownTimer: 0,
-    phaseLabel: null,
-    xp: 0,
-    level: 1,
-    xpToNext: 10,
-    meteorTimer: 10, // First meteor comes soon after picking
-    paused: false,
-    jammingTimer: 0,
-    spawnedEnemyTypes: [],
-};
+// Game State Initialization
+function getInitialGameState() {
+    return {
+        currentWave: 1,
+        phase: "day",
+        dayTimer: 0,
+        enemiesInWave: 0,
+        enemiesSpawned: 0,
+        currentBgm: null,
+        upgrades: {
+            pickupRadius: 100,
+            pickupRadiusMod: 1.0,
+            chainLightning: 0,
+            explosiveRounds: 0,
+            bulletSizeMod: 1.0,
+            maxTurrets: 3,
+            turretCooldown: 5.0,
+            turretCooldownMod: 1.0,
+            pierce: 0,
+            multiShot: 0,
+            homing: 0,
+            critChance: 0,
+            turretHpMod: 1.0,
+            turretFireRateMod: 1.0,
+            turretRangeMod: 1.0,
+            turretDmgMod: 1.0,
+            roboCircus: 0,
+            ricochet: 0,
+            drone: 0,
+            droneLvl: 0,
+            healBot: 0,
+            orbitingProjectiles: 0,
+            omegaStrike: 0,
+            holographicDecoy: 0,
+            meteorFall: 0,
+        },
+        activeTurrets: 0,
+        turretCooldownTimer: 0,
+        phaseLabel: null,
+        xp: 0,
+        level: 1,
+        xpToNext: 10,
+        meteorTimer: 10, // First meteor comes soon after picking
+        paused: false,
+        jammingTimer: 0,
+        spawnedEnemyTypes: [],
+    };
+}
+
+let gameState = getInitialGameState();
 
 const debugWaveSkip = () => {
     const waveInput = prompt("開始ウェーブを入力してください (1-99):", "1");
@@ -200,9 +204,10 @@ scene("start", () => {
 });
 
 scene("main", ({ startWave } = { startWave: 1 }) => {
+    gameState = getInitialGameState();
+    gameState.currentWave = startWave;
     let delta = 0;
     onUpdate(() => { delta = Math.min(dt(), 0.1); });
-    gameState.currentWave = startWave;
     add([sprite("wide_map", { width: MAP_WIDTH, height: MAP_HEIGHT }), pos(0, 0), z(-1)]);
 
     // Performance Optimization: Cache entities globally for the current frame
