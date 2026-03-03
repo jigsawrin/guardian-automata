@@ -223,7 +223,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     const hudLevel = add([
         text("LEVEL 1", { size: isMobile ? 18 : 20, font: "monospace" }),
-        pos(20, isMobile ? 35 : 68),
+        pos(isMobile ? 10 : 20, isMobile ? 20 : 68),
         anchor("left"),
         fixed(),
         z(500),
@@ -232,8 +232,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     ]);
 
     const waveCounterLabel = add([
-        text("WAVE: 1", { size: isMobile ? 18 : 24, font: "monospace" }),
-        pos(isMobile ? width() / 2 : width() - 20, isMobile ? 65 : 65),
+        text("WAVE: 1", { size: isMobile ? 20 : 24, font: "monospace" }),
+        pos(isMobile ? width() / 2 : width() - 20, isMobile ? 55 : 65),
         anchor(isMobile ? "center" : "right"),
         fixed(),
         z(500),
@@ -246,7 +246,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     gameState.phaseIndicator = add([
         text("1日目：昼", { size: isMobile ? 22 : 32, font: "monospace" }),
-        pos(width() / 2, isMobile ? 35 : 40),
+        pos(width() / 2, isMobile ? 20 : 40),
         anchor("center"),
         fixed(),
         z(500),
@@ -256,7 +256,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     const dayTimerLabel = add([
         text("", { size: isMobile ? 18 : 24, font: "monospace" }),
-        pos(width() - 20, isMobile ? 35 : 40),
+        pos(width() - 10, isMobile ? 20 : 40),
         anchor("right"),
         fixed(),
         z(500),
@@ -294,11 +294,11 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             camPos(cx, cy);
         }
 
-        // Universal Boundary Clamping (Responsive)
-        const marginX = 40;
-        const marginYTop = isMobile ? 100 : 130;
-        const marginYBot = isMobile ? 60 : 130;
-        player.pos.x = Math.max(marginX, Math.min(MAP_WIDTH - marginX, player.pos.x));
+        // Universal Boundary Clamping (Responsive Sync with Visual Lines)
+        // Sprite height is 80, so half-height 40. Lines at 88 and height-88.
+        const marginYTop = 88 + 40;
+        const marginYBot = 88 + 40;
+        player.pos.x = Math.max(40, Math.min(MAP_WIDTH - 40, player.pos.x));
         player.pos.y = Math.max(marginYTop, Math.min(MAP_HEIGHT - marginYBot, player.pos.y));
 
         if (gameState.turretCooldownTimer > 0) gameState.turretCooldownTimer -= dt();
@@ -379,7 +379,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
         const activeCount = get("turret").length;
         const uiX = width() / 2;
-        const uiY = height() - 40;
+        const uiY = height() - 44; // Half of bottom line area (88/2)
         // Turret UI Icon
         drawCircle({
             pos: vec2(uiX - 100, uiY),
@@ -492,8 +492,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (gameState.paused) return;
         const mPos = isMobile ? toWorld(mousePos()) : mousePos();
 
-        // Check for click on UI or invalid area (More permissive on world coordinates)
-        if (mPos.y < 40 || mPos.y > MAP_HEIGHT - 40) return;
+        // Check for click on UI or invalid area (Strict sync with lines)
+        if (mPos.y < 88 || mPos.y > (isMobile ? height() : height()) - 88) return;
 
         const now = time();
         const timeSinceLastTap = now - player.lastTapTime;
