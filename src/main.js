@@ -667,15 +667,29 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             if (e.pos.dist(decoy.pos) < 600) {
                 targetPos = decoy.pos.add(vec2(0, e.targetOffset || 0));
                 isDecoyTarget = true;
+                e.wasTargetingDecoy = true;
+
+                // Fallback: Immediate collision if extremely close to decoy (prevents jitter/pass-through)
+                if (e.pos.dist(decoy.pos) < 30) {
+                    e.trigger("collide", decoy);
+                }
             }
+        }
+
+        // If we were targeting a decoy but it's gone, recalc path immediately
+        if (!isDecoyTarget && e.wasTargetingDecoy) {
+            e.wasTargetingDecoy = false;
+            e.trigger("recalc_path");
         }
 
         let dir = vec2(-1, 0);
         if (!gameState.paused) {
+            const distToTarget = targetPos.dist(e.pos);
+
             // Priority: If targeting decoy, ignore pre-calculated path to core
             if (isDecoyTarget) {
                 const diff = targetPos.sub(e.pos);
-                if (diff.len() > 0.001) dir = diff.unit();
+                if (diff.len() > 0.1) dir = diff.unit();
             } else if (e.path && e.path.length > 0) {
                 if (e.pos.dist(e.path[0]) < 25) { 
                     e.path.shift(); 
@@ -684,35 +698,40 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     targetPos = e.path[0];
                 }
                 const diff = targetPos.sub(e.pos);
-                if (diff.len() > 0.001) dir = diff.unit();
+                if (diff.len() > 0.1) dir = diff.unit();
             } else { 
                 if (rand() < 0.05) e.trigger("recalc_path"); 
             }
 
             if (dir.x < -0.1) e.flipX = true; else if (dir.x > 0.1) e.flipX = false;
-
-            // Optimization: Raw math separation (NO VECTOR ALLOCATIONS)
-            const ex = e.pos.x;
-            const ey = e.pos.y;
+            
+            // Apply separation only if not extremely close to target (prevents vibration at destination)
             let sepX = 0;
             let sepY = 0;
+            if (distToTarget > 30) {
+                // Optimization: Raw math separation (NO VECTOR ALLOCATIONS)
+                const ex = e.pos.x;
+                const ey = e.pos.y;
+                for (let i = 0; i < frameEnemies.length; i++) {
+                    const other = frameEnemies[i];
+                    if (other === e || !other.exists()) continue;
+                    const ox = other.pos.x;
+                    const oy = other.pos.y;
+                    const dx = ex - ox;
+                    const dy = ey - oy;
+                    const distSq = dx * dx + dy * dy;
 
-            for (let i = 0; i < frameEnemies.length; i++) {
-                const other = frameEnemies[i];
-                if (other === e || !other.exists()) continue;
-                const ox = other.pos.x;
-                const oy = other.pos.y;
-                const dx = ex - ox;
-                const dy = ey - oy;
-                const distSq = dx * dx + dy * dy;
-
-                if (distSq < 2500 && distSq > 0.1) { // dist < 50
-                    const dist = Math.sqrt(distSq);
-                    sepX += (dx / dist) * 0.8;
-                    sepY += (dy / dist) * 0.8;
+                    if (distSq < 2000 && distSq > 0.1) { // dist < ~45
+                        const dist = Math.sqrt(distSq);
+                        sepX += (dx / dist) * 0.6;
+                        sepY += (dy / dist) * 0.6;
+                    }
                 }
             }
-            dir = vec2(dir.x + sepX + rand(-0.5, 0.5), dir.y + sepY + rand(-0.5, 0.5));
+            
+            // Reduced randomness when near target
+            const randAmp = distToTarget < 50 ? 0.1 : 0.5;
+            dir = vec2(dir.x + sepX + rand(-randAmp, randAmp), dir.y + sepY + rand(-randAmp, randAmp));
 
             const corePos = vec2(CORE_X, MAP_HEIGHT / 2);
             if (e.is("ranged") && e.pos.dist(corePos) < e.stopDistance) {
