@@ -147,6 +147,13 @@ export const UPGRADE_CARDS = [
         effect: (gs) => { gs.upgrades.orbitingProjectiles += 1; }
     },
     {
+        id: "holographic_decoy",
+        title: "💠 ホログラフィック・デコイ",
+        desc: "拠点の前に囮（デコイ）を設置します。敵の視線を引きつけますが、一定回数攻撃を受けると消滅します。",
+        effect: (gs) => { gs.upgrades.holographicDecoy = 1; },
+        condition: (gs) => gs.level >= 25 && gs.upgrades.holographicDecoy === 0
+    },
+    {
         id: "omega_strike",
         title: "🔯 【最終兵器】オメガ・ストライク",
         desc: "タレットの弾丸が全てを超越した巨大な貫通レーザーへと変貌します。",

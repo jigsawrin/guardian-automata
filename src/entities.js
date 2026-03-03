@@ -441,6 +441,7 @@ export function build(type, player, upgrades, level = 1, spriteName = "turret") 
                 maxHp: hp * (upgrades.turretHpMod || 1),
                 fireRate: fireRate,
                 timer: 0,
+                firstShot: true, // v3.2.5 feature
                 range: range,
                 dmg: dmg,
                 bcol: bcol

@@ -118,6 +118,8 @@ const gameState = {
         healBot: 0,
         orbitingProjectiles: 0,
         omegaStrike: 0,
+        holographicDecoy: 0,
+        roboCircus: 0,
     },
     activeTurrets: 0,
     turretCooldownTimer: 0,
@@ -655,7 +657,19 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         e.pos.y = clamp(e.pos.y, 40, height() - 100);
 
         const coreY = MAP_HEIGHT / 2;
+        const corePos = vec2(CORE_X, coreY);
+        const decoys = get("decoy");
+        
         let targetPos = vec2(CORE_X, coreY + (e.pos.x < 300 ? 0 : (e.targetOffset || 0)));
+        
+        // Target Decoy if it exists and is within a reasonable "distraction" range
+        if (decoys.length > 0 && e.pos.x > CORE_X) {
+            const decoy = decoys[0];
+            if (e.pos.dist(decoy.pos) < 600) {
+                targetPos = decoy.pos.add(vec2(0, e.targetOffset || 0));
+            }
+        }
+
         let dir = vec2(-1, 0);
         if (!gameState.paused) {
             if (e.path && e.path.length > 0) {
@@ -796,7 +810,32 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     const firePos = t.pos;
                     t.timer = 0;
 
-                    // Support for Multi-Shot: Ensure center bullet + side pairs
+                    const isOmegaLaser = (gameState.upgrades.omegaStrike > 0 && t.firstShot);
+                    if (isOmegaLaser) {
+                        t.firstShot = false;
+                        // Fire massive laser
+                        const diff = closest.pos.sub(t.pos);
+                        const dir = diff.len() > 0.1 ? diff.unit() : vec2(-1, 0);
+                        const beamLength = 1500;
+                        const beam = add([
+                            rect(beamLength, 40),
+                            pos(t.pos),
+                            rotate(dir.angle()),
+                            anchor("left"), // Grow from turret
+                            color(200, 255, 255),
+                            opacity(1),
+                            area(),
+                            z(95),
+                            "laser_beam",
+                            { dmg: 50 }
+                        ]);
+                        beam.onUpdate(() => {
+                            beam.opacity -= delta * 5;
+                            if (beam.opacity <= 0) destroy(beam);
+                        });
+                        sounds.laser();
+                    } else {
+                        // Support for Multi-Shot: Ensure center bullet + side pairs
                     const shots = 1 + (gameState.upgrades.multiShot * 2);
                     const spread = 15; // Slightly tighter spread for better concentration
 
@@ -987,6 +1026,16 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
         // Standard damage
         e.hp -= dmg;
+        
+        if (e.is("decoy")) {
+            if (e.hp <= 0) {
+                createExplosion(e.pos, gameState.level);
+                sounds.explode();
+                destroy(e);
+            }
+            return;
+        }
+
         updateEnemyHpBar(e);
 
         if (e.hp <= 0 && e.exists()) {
@@ -1002,6 +1051,10 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             }
         }
     };
+
+    onCollide("laser_beam", "enemy", (l, e) => {
+        applyDamage(e, l.dmg, false); // Lasers ignore hit-count shields or bypass them? Let's say bypass for romantics.
+    });
 
     onCollide("bullet", "enemy", (b, e) => {
         if (gameState.paused || !b.exists()) return; 

@@ -8,6 +8,7 @@ export function createSystems(gameState) {
     function startDay() {
         if (gameState.upgrades.drone > 0) spawnDrone(gameState, sounds);
         if (gameState.upgrades.healBot > 0) spawnHealBot(gameState, sounds);
+        if (gameState.upgrades.holographicDecoy > 0) spawnDecoy(gameState, sounds);
         if (gameState.currentBgm) { gameState.currentBgm.stop(); gameState.currentBgm = null; }
         gameState.currentBgm = play("bgm_day", { loop: true, volume: 0.5 });
 
