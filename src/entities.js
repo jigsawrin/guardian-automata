@@ -119,7 +119,7 @@ export function spawnEnemy(gameState, enemiesSpawned) {
     const currentWave = gameState.currentWave;
     console.assert(typeof currentWave === 'number', "spawnEnemy: currentWave must be a number");
     console.assert(typeof enemiesSpawned === 'number', "spawnEnemy: enemiesSpawned must be a number");
-    const spawnPos = vec2(MAP_WIDTH + 100, rand(140, MAP_HEIGHT - 140));
+    const spawnPos = vec2(MAP_WIDTH + 100, rand(128, MAP_HEIGHT - 128));
     let type = "normal";
 
     if (currentWave === 8) {

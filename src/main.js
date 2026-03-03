@@ -179,15 +179,16 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         add([sprite("obs_" + block.type, { width: w * TILE_SIZE, height: h * TILE_SIZE }), pos(block.x * TILE_SIZE, block.y * TILE_SIZE), area(), body({ isStatic: true }), "obstacle", z(10), { obsType: block.type }]);
     }
 
-    // Components
-    const girl = add([sprite("girl"), pos(CORE_X, height() / 2), scale(0.25), area(), anchor("center"), z(90), "girl", { hp: 100, maxHp: 100 }]);
-    const girlHpBar = add([rect(100, 10), pos(CORE_X, height() / 2 - 70), color(50, 50, 50), outline(2), anchor("center"), z(110)]);
+    // Components (Anchored to World Y for AI stability)
+    const girlY = MAP_HEIGHT / 2;
+    const girl = add([sprite("girl"), pos(CORE_X, girlY), scale(0.25), area(), anchor("center"), z(90), "girl", { hp: 100, maxHp: 100 }]);
+    const girlHpBar = add([rect(100, 10), pos(CORE_X, girlY - 70), color(50, 50, 50), outline(2), anchor("center"), z(110)]);
     const girlHpFill = girlHpBar.add([rect(100, 10), pos(-50, -5), color(0, 255, 100), anchor("topleft"), z(110)]);
-    add([text("シールド耐久値", { size: 14, font: "monospace" }), pos(CORE_X, height() / 2 - 85), anchor("center"), color(0, 255, 100), z(115)]);
+    add([text("シールド耐久値", { size: 14, font: "monospace" }), pos(CORE_X, girlY - 85), anchor("center"), color(0, 255, 100), z(115)]);
 
     const player = add([
         sprite("player", { width: 80, height: 80 }),
-        pos(250, height() / 2),
+        pos(250, girlY),
         area({ scale: 0.6 }),
         body(),
         anchor("center"),
@@ -224,7 +225,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     const hudLevel = add([
         text("LEVEL 1", { size: isMobile ? 18 : 20, font: "monospace" }),
-        pos(isMobile ? 10 : 20, isMobile ? 20 : 68),
+        pos(isMobile ? 10 : 20, isMobile ? 15 : 68),
         anchor("left"),
         fixed(),
         z(500),
@@ -233,7 +234,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     ]);
 
     const waveCounterLabel = add([
-        text("WAVE: 1", { size: isMobile ? 20 : 24, font: "monospace" }),
+        text("WAVE: 1", { size: isMobile ? 22 : 24, font: "monospace" }),
         pos(isMobile ? width() / 2 : width() - 20, isMobile ? 55 : 65),
         anchor(isMobile ? "center" : "right"),
         fixed(),
@@ -247,7 +248,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     gameState.phaseIndicator = add([
         text("1日目：昼", { size: isMobile ? 22 : 32, font: "monospace" }),
-        pos(width() / 2, isMobile ? 20 : 40),
+        pos(width() / 2, isMobile ? 15 : 40),
         anchor("center"),
         fixed(),
         z(500),
@@ -257,7 +258,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     const dayTimerLabel = add([
         text("", { size: isMobile ? 18 : 24, font: "monospace" }),
-        pos(width() - 10, isMobile ? 20 : 40),
+        pos(width() - 10, isMobile ? 15 : 40),
         anchor("right"),
         fixed(),
         z(500),
@@ -380,7 +381,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
         const activeCount = get("turret").length;
         const uiX = width() / 2;
-        const uiY = height() - 44; // Half of bottom line area (88/2)
+        // The bottom line is at height() - 88. HUD center is at height() - 44.
+        const uiY = height() - 44;
         // Turret UI Icon
         drawCircle({
             pos: vec2(uiX - 100, uiY),
@@ -1211,8 +1213,9 @@ scene("gameover", ({ finalWave }) => {
     gameState.currentBgm = play("bgm_gameover", { loop: true, volume: 0.5 });
     add([text("MISSION FAILED", { size: isMobile ? 32 : 48, font: "monospace" }), pos(width() / 2, height() / 2 - 50), anchor("center"), color(255, 50, 50)]);
     add([text("FINAL WAVE: " + finalWave, { size: 24, font: "monospace" }), pos(width() / 2, height() / 2 + 20), anchor("center")]);
-    add([text("PRESS SPACE TO RETURN", { size: 16, font: "monospace" }), pos(width() / 2, height() / 2 + 80), anchor("center")]);
+    add([text("PRESS SPACE OR TAP TO RETURN", { size: 16, font: "monospace" }), pos(width() / 2, height() / 2 + 80), anchor("center")]);
     onKeyPress("space", () => go("start"));
+    onClick(() => go("start"));
 });
 
 go("intro");
