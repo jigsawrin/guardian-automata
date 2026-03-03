@@ -657,7 +657,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         e.pos.y = clamp(e.pos.y, 40, height() - 100);
 
         const coreY = MAP_HEIGHT / 2;
-        const corePos = vec2(CORE_X, coreY);
+        let targetPos = vec2(CORE_X, coreY + (e.pos.x < 300 ? 0 : (e.targetOffset || 0)));
         const decoys = get("decoy");
         
         // Target Decoy if it exists and is within a reasonable "distraction" range
