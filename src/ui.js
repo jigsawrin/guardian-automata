@@ -45,18 +45,28 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
         const x = isMobile ? 0 : (-300 + i * 300);
         const y = isMobile ? (-pickerH / 2 + 200 + i * 160) : 40;
 
-        const cardW = isMobile ? pickerW - 40 : 260;
-        const cardH = isMobile ? 140 : 380;
+        const isOverload = card.condition && card.condition({ level: 50 }) && !card.condition({ level: 49 });
 
         const cardBg = picker.add([
             rect(cardW, cardH),
             pos(x, y),
-            color(40, 40, 60),
+            color(isOverload ? rgb(60, 50, 20) : rgb(40, 40, 60)),
             anchor("center"),
             area(),
-            outline(2, rgb(100, 100, 150)),
-            "card_btn"
+            outline(isOverload ? 4 : 2, isOverload ? rgb(255, 215, 0) : rgb(100, 100, 150)),
+            "card_btn",
+            { isOverload }
         ]);
+
+        if (isOverload) {
+            cardBg.add([
+                rect(cardW, cardH),
+                anchor("center"),
+                color(255, 255, 255),
+                opacity(0.1),
+                z(-1)
+            ]);
+        }
 
         const titleText = typeof card.title === 'function' ? card.title(gameState) : card.title;
         cardBg.add([

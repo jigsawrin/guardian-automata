@@ -146,4 +146,11 @@ export const UPGRADE_CARDS = [
         desc: (gs) => `旋回する鉄の塊を${gs.upgrades.orbitingProjectiles > 0 ? " さらに" : ""} +1 します。`,
         effect: (gs) => { gs.upgrades.orbitingProjectiles += 1; }
     },
+    {
+        id: "omega_strike",
+        title: "🔯 【最終兵器】オメガ・ストライク",
+        desc: "タレットの弾丸が全てを超越した巨大な貫通レーザーへと変貌します。",
+        effect: (gs) => { gs.upgrades.omegaStrike = 1; },
+        condition: (gs) => gs.level >= 50 && gs.upgrades.omegaStrike === 0
+    },
 ];

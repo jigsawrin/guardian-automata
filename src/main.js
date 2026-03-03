@@ -102,6 +102,7 @@ const gameState = {
         droneLvl: 0,
         healBot: 0,
         orbitingProjectiles: 0,
+        omegaStrike: 0,
     },
     activeTurrets: 0,
     turretCooldownTimer: 0,
@@ -748,28 +749,40 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                             const subFinalAngle = finalAngle + subAngle;
                             const subDir = vec2(Math.cos(subFinalAngle * Math.PI / 180), Math.sin(subFinalAngle * Math.PI / 180));
 
+                            const isOmega = gameState.upgrades.omegaStrike > 0;
                             const b = add([
-                                rect((isCrit ? 18 : 12) * gameState.upgrades.bulletSizeMod, (isCrit ? 8 : 4) * gameState.upgrades.bulletSizeMod),
+                                rect((isOmega ? 80 : (isCrit ? 18 : 12)) * gameState.upgrades.bulletSizeMod, (isOmega ? 2000 : (isCrit ? 8 : 4)) * gameState.upgrades.bulletSizeMod),
                                 pos(firePos),
-                                color(bulletColor),
-                                area({ scale: vec2(2, 2) }), // Fixed scale, visually grows with rect
+                                color(isOmega ? rgb(0, 255, 255) : bulletColor),
+                                area({ scale: isOmega ? vec2(1, 1) : vec2(2, 2) }),
                                 rotate(subFinalAngle),
-                                offscreen({ destroy: true, distance: 400 }), // Increased distance
+                                offscreen({ destroy: true, distance: isOmega ? 2000 : 400 }),
                                 "bullet",
                                 z(95),
                                 {
-                                    dmg: bulletDmg,
+                                    dmg: isOmega ? 10 : bulletDmg,
                                     isCrit: isCrit,
-                                    pierce: gameState.upgrades.pierce,
-                                    homing: gameState.upgrades.homing,
-                                    homingScanTimer: rand(0, 0.1), // Stagger initial scan
+                                    pierce: isOmega ? 999 : gameState.upgrades.pierce,
+                                    homing: isOmega ? 0 : gameState.upgrades.homing,
+                                    homingScanTimer: rand(0, 0.1),
                                     dir: subDir,
-                                    circus: roboEnabled,
+                                    circus: isOmega ? false : roboEnabled,
                                     wobbleTime: rand(0, 10),
-                                    ricochet: gameState.upgrades.ricochet,
-                                    source: "turret"
+                                    ricochet: isOmega ? 0 : gameState.upgrades.ricochet,
+                                    source: "turret",
+                                    isOmega: isOmega
                                 }
                             ]);
+
+                            if (isOmega) {
+                                // Add a glowing core to the laser
+                                b.add([
+                                    rect(20, 2000),
+                                    anchor("center"),
+                                    color(255, 255, 255),
+                                    z(1)
+                                ]);
+                            }
 
                             b.onUpdate(() => {
                                 if (gameState.paused) return;
