@@ -1,5 +1,5 @@
 import { sounds } from './audio.js';
-import { spawnDecoy } from './entities.js';
+import { spawnDecoy, spawnDrone } from './entities.js';
 
 export const UPGRADE_CARDS = [
     {
@@ -118,7 +118,10 @@ export const UPGRADE_CARDS = [
         id: "drone",
         title: "🛸 近接防衛ドローン",
         desc: "自動で敵を追尾し攻撃するドローンが出現します。攻撃のたびに耐久力が減少します。",
-        effect: (gs) => { gs.upgrades.drone = 1; },
+        effect: (gs) => { 
+            gs.upgrades.drone = 1; 
+            spawnDrone(gs, sounds);
+        },
         condition: (gs) => gs.upgrades.drone === 0 && gs.level >= 10
     },
     {
@@ -134,7 +137,14 @@ export const UPGRADE_CARDS = [
         desc: (gs) => `ドローンの性能を${gs.upgrades.droneLvl > 0 ? " さらに" : ""}向上させます。`,
         effect: (gs) => {
             gs.upgrades.droneLvl += 1;
+            const oldDroneCount = gs.upgrades.drone;
             if (gs.upgrades.droneLvl === 3) gs.upgrades.drone = 2;
+            
+            // If count increased, spawn the new one
+            if (gs.upgrades.drone > oldDroneCount) {
+                spawnDrone(gs, sounds);
+            }
+
             get("drone").forEach(d => {
                 d.maxHp = 1 + gs.upgrades.droneLvl;
                 d.hp = Math.min(d.maxHp, d.hp + 1);

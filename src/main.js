@@ -1302,11 +1302,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             lastHealBotLevel = hLevel;
             if (hLevel > 0) spawnHealBot(gameState, sounds);
         }
-
-        const dLimit = gameState.upgrades.drone;
-        if (get("drone").length < dLimit) {
-            spawnDrone(gameState, sounds);
-        }
     });
 
     // Orbiting Projectiles (Metal Chunks) logic
