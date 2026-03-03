@@ -485,7 +485,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             const mapH = 56;
             const pad = 12;
             const mX = width() - mapW - pad;
-            const mY = 80;
+            const mY = 100;
 
             drawRect({
                 width: mapW,
