@@ -362,7 +362,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (gameState.turretCooldownTimer > 0) gameState.turretCooldownTimer -= dt();
         if (gameState.jammingTimer > 0) gameState.jammingTimer -= dt();
 
-        if (gameState.phase === "day") {
+        if (gameState.phase === "day" && !gameState.paused) {
             gameState.dayTimer -= dt();
             if (gameState.dayTimer <= 0) systems.startNight();
         } else if (gameState.phase === "night" && gameState.enemiesSpawned >= gameState.enemiesInWave && get("enemy").length === 0) {
@@ -1067,9 +1067,11 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     });
 
     const triggerLevelUp = () => {
+        if (gameState.paused) return;
         gameState.level++;
         gameState.xpToNext = Math.floor(gameState.xpToNext * 1.15) + 3;
         sounds.upgrade();
+        destroyAll("ui_picker");
         showUpgradePicker(gameState, player, girl, UPGRADE_CARDS, null, isMobile);
     };
 

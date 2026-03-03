@@ -3,6 +3,7 @@ import { CONTROLS } from './constants.js';
 
 
 export function showUpgradePicker(gameState, player, girl, cards, onComplete, isMobile = false) {
+    gameState.paused = true;
     const pickerW = isMobile ? width() * 0.98 : 900;
     const pickerH = isMobile ? height() * 0.95 : 560;
 
@@ -14,6 +15,7 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete, is
         outline(4, rgb(0, 255, 255)),
         fixed(),
         z(2000),
+        "ui_picker"
     ]);
 
     picker.add([
