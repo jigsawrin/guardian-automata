@@ -126,7 +126,7 @@ const debugWaveSkip = () => {
 
 scene("intro", () => {
     add([
-        text("CLICK TO START", { size: 32, font: "monospace" }),
+        text("CLICK TO START", { size: isMobile ? 24 : 32, font: "monospace" }),
         pos(width() / 2, height() / 2),
         anchor("center"),
         color(255, 255, 255),
@@ -140,7 +140,7 @@ scene("start", () => {
     gameState.currentBgm = play("bgm_title", { loop: true, volume: 0.5 });
     add([sprite("title_logo"), pos(width() / 2, height() / 2 - 120), anchor("center"), scale(0.8)]);
     add([sprite("girl"), pos(width() / 2, height() / 2 + 50), scale(0.25), anchor("center")]);
-    const startMsg = add([text("PRESS SPACE OR TAP TO INITIALIZE", { size: 24, font: "monospace" }), pos(width() / 2, height() / 2 + 160), anchor("center")]);
+    const startMsg = add([text("PRESS SPACE OR TAP TO INITIALIZE", { size: isMobile ? 16 : 24, font: "monospace" }), pos(width() / 2, height() / 2 + 160), anchor("center")]);
     add([text("BEST RECORD: WAVE " + highScore, { size: 16, font: "monospace" }), pos(width() / 2, height() / 2 + 200), anchor("center"), color(255, 255, 0)]);
     onUpdate(() => startMsg.opacity = wave(0.3, 1, time() * 5));
     const startGame = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); sounds.waveStart(); go("main", { startWave: 1 }); };
@@ -1204,7 +1204,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 scene("gameover", ({ finalWave }) => {
     if (gameState.currentBgm) gameState.currentBgm.stop();
     gameState.currentBgm = play("bgm_gameover", { loop: true, volume: 0.5 });
-    add([text("MISSION FAILED", { size: 48, font: "monospace" }), pos(width() / 2, height() / 2 - 50), anchor("center"), color(255, 50, 50)]);
+    add([text("MISSION FAILED", { size: isMobile ? 32 : 48, font: "monospace" }), pos(width() / 2, height() / 2 - 50), anchor("center"), color(255, 50, 50)]);
     add([text("FINAL WAVE: " + finalWave, { size: 24, font: "monospace" }), pos(width() / 2, height() / 2 + 20), anchor("center")]);
     add([text("PRESS SPACE TO RETURN", { size: 16, font: "monospace" }), pos(width() / 2, height() / 2 + 80), anchor("center")]);
     onKeyPress("space", () => go("start"));
