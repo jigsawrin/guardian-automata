@@ -485,7 +485,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     // Touch / Mouse Controls
     onClick(() => {
         if (gameState.paused) return;
-        const mPos = mousePos();
+        const mPos = isMobile ? toWorld(mousePos()) : mousePos();
 
         // Check for click on UI or invalid area
         if (mPos.y < 80 || mPos.y > height() - 88) return;

@@ -1,6 +1,6 @@
 import { sounds } from './audio.js';
 import { createExplosion, findPath, createHealEffect } from './utils.js';
-import { TILE_SIZE } from './constants.js';
+import { TILE_SIZE, MAP_WIDTH, MAP_HEIGHT } from './constants.js';
 
 export function dropResource(p, level = 1) {
     console.assert(p && typeof p.x === 'number' && typeof p.y === 'number', "dropResource: p must be a vector (vec2)");
