@@ -2,13 +2,7 @@ import { sounds } from './audio.js';
 import { CONTROLS } from './constants.js';
 
 
-export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
-    console.assert(gameState && typeof gameState.level === 'number', "showUpgradePicker: gameState must be an object");
-    console.assert(Array.isArray(cards), "showUpgradePicker: cards must be an array");
-    gameState.paused = true;
-
-    // Aspect Ratio Detection: Portrait layout if taller than wide
-    const isMobile = window.innerHeight > window.innerWidth;
+export function showUpgradePicker(gameState, player, girl, cards, onComplete, isMobile = false) {
     const pickerW = isMobile ? width() * 0.98 : 900;
     const pickerH = isMobile ? height() * 0.95 : 560;
 

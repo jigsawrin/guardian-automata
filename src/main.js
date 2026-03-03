@@ -10,8 +10,7 @@ import { initDebugUI } from './debug.js';
 initDebugUI();
 
 // Aspect Ratio Detection for Desktop/Mobile and Embedded (iframe) support
-const isPortrait = window.innerHeight > window.innerWidth;
-const isMobile = isPortrait; // Use aspect ratio to decide layout
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth < window.innerHeight && window.innerWidth < 600);
 const viewWidth = isMobile ? 360 : MAP_WIDTH;
 const viewHeight = isMobile ? 640 : MAP_HEIGHT;
 
@@ -1058,7 +1057,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         gameState.level++;
         gameState.xpToNext = Math.floor(gameState.xpToNext * 1.15) + 3;
         sounds.upgrade();
-        showUpgradePicker(gameState, player, girl, UPGRADE_CARDS);
+        showUpgradePicker(gameState, player, girl, UPGRADE_CARDS, null, isMobile);
     };
 
     onKeyPress("p", triggerLevelUp);
