@@ -860,7 +860,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     if (d < sonicMinDist) { sonicMinDist = d; sonicTarget = e; }
                 }
                 spawnSonicWave(t, sonicTarget, gameState);
-                sounds.laser(); // Reuse laser sound for sonic wave or similar
+                sounds.sonic(); // Use dedicated sonic sound (v3.6.3)
             }
         }
 

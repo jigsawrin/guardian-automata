@@ -95,4 +95,13 @@ export const sounds = {
     },
     hit: () => playSound(400 + Math.random() * 100, 0.05, "sine", 0.05, 200),
     spawn: () => playSound(600, 0.2, "sine", 0.1, 1200),
+    laser: () => {
+        playSound(1000, 0.15, "sawtooth", 0.1, 2000); // Sharp "pew"
+        setTimeout(() => playSound(1500, 0.1, "sine", 0.05, 500), 20);
+    },
+    sonic: () => {
+        // Resonant wave sound
+        playSound(200, 0.4, "sine", 0.15, 600);
+        setTimeout(() => playSound(400, 0.3, "sawtooth", 0.08, 100), 50);
+    }
 };
