@@ -382,155 +382,168 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
     });
 
-    onDraw(() => {
-        // --- HUD & Turret UI (Z-Index baseline 1200) ---
-        const activeCount = get("turret").length;
-        const screenTopLeft = camPos().sub(width() / 2, height() / 2);
-        const uiX = screenTopLeft.x + width() / 2;
-        const uiY = screenTopLeft.y + height() - 44;
+    add([
+        fixed(),
+        z(5000),
+        {
+            draw() {
+                // --- HUD & Turret UI ---
+                const activeCount = get("turret").length;
+                const screenTopLeft = camPos().sub(width() / 2, height() / 2);
+                const uiX = isMobile ? width() / 2 : screenTopLeft.x + width() / 2;
+                const uiY = isMobile ? height() - 44 : screenTopLeft.y + height() - 44;
 
-        // Turret UI Icon
-        drawCircle({
-            pos: vec2(uiX - 100, uiY),
-            radius: 25,
-            color: rgb(40, 40, 60),
-            outline: { color: rgb(100, 100, 200), width: 2 },
-        });
+                // Turret UI Icon
+                drawCircle({
+                    pos: vec2(uiX - 100, uiY),
+                    radius: 25,
+                    color: rgb(40, 40, 60),
+                    outline: { color: rgb(100, 100, 200), width: 2 },
+                    fixed: true
+                });
 
-        if (gameState.turretCooldownTimer > 0) {
-            const p = 1 - (gameState.turretCooldownTimer / (gameState.upgrades.turretCooldown / gameState.upgrades.turretCooldownMod));
-            const pts = [vec2(0, 0)];
-            const step = 20;
-            for (let i = 0; i <= p * 360; i += step) {
-                const angle = i - 90;
-                pts.push(vec2(Math.cos(angle * Math.PI / 180) * 25, Math.sin(angle * Math.PI / 180) * 25));
-            }
-            const finalAngle = (p * 360) - 90;
-            pts.push(vec2(Math.cos(finalAngle * Math.PI / 180) * 25, Math.sin(finalAngle * Math.PI / 180) * 25));
+                if (gameState.turretCooldownTimer > 0) {
+                    const p = 1 - (gameState.turretCooldownTimer / (gameState.upgrades.turretCooldown / gameState.upgrades.turretCooldownMod));
+                    const pts = [vec2(0, 0)];
+                    const step = 20;
+                    for (let i = 0; i <= p * 360; i += step) {
+                        const angle = i - 90;
+                        pts.push(vec2(Math.cos(angle * Math.PI / 180) * 25, Math.sin(angle * Math.PI / 180) * 25));
+                    }
+                    const finalAngle = (p * 360) - 90;
+                    pts.push(vec2(Math.cos(finalAngle * Math.PI / 180) * 25, Math.sin(finalAngle * Math.PI / 180) * 25));
 
-            if (pts.length > 2) {
-                try {
-                    drawPoly({
-                        pos: vec2(uiX - 100, uiY),
-                        pts: pts,
-                        color: rgb(0, 255, 255),
-                        opacity: 0.6,
-                    });
-                } catch (e) {
+                    if (pts.length > 2) {
+                        try {
+                            drawPoly({
+                                pos: vec2(uiX - 100, uiY),
+                                pts: pts,
+                                color: rgb(0, 255, 255),
+                                opacity: 0.6,
+                                fixed: true
+                            });
+                        } catch (e) {
+                            drawCircle({
+                                pos: vec2(uiX - 100, uiY),
+                                radius: 25 * p,
+                                color: rgb(0, 255, 255),
+                                opacity: 0.4,
+                                fixed: true
+                            });
+                        }
+                    }
+                } else {
                     drawCircle({
                         pos: vec2(uiX - 100, uiY),
-                        radius: 25 * p,
+                        radius: 25,
                         color: rgb(0, 255, 255),
-                        opacity: 0.4,
+                        opacity: 0.3,
+                        fixed: true
+                    });
+                }
+
+                drawSprite({
+                    sprite: getTurretSprite(gameState.level),
+                    pos: vec2(uiX - 100, uiY),
+                    width: 40,
+                    height: 40,
+                    anchor: "center",
+                    opacity: gameState.turretCooldownTimer > 0 ? 0.5 : 1,
+                    fixed: true
+                });
+
+                drawText({
+                    text: "W",
+                    size: 16,
+                    pos: vec2(uiX - 100, uiY + 32),
+                    anchor: "center",
+                    font: "monospace",
+                    color: rgb(255, 255, 255),
+                    outline: { color: rgb(0, 0, 0), width: 1 },
+                    fixed: true
+                });
+
+                drawText({
+                    text: `${activeCount} / ${gameState.upgrades.maxTurrets}`,
+                    size: 24,
+                    pos: vec2(uiX - 60, uiY),
+                    anchor: "left",
+                    font: "monospace",
+                    color: activeCount >= gameState.upgrades.maxTurrets ? rgb(255, 50, 50) : rgb(255, 255, 255),
+                    fixed: true
+                });
+
+                // Jamming Screen Effect
+                if (gameState.jammingTimer > 0) {
+                    const op = wave(0.05, 0.15, time() * 20);
+                    drawRect({
+                        width: width(),
+                        height: height(),
+                        pos: vec2(0, 0),
+                        color: rgb(200, 200, 255),
+                        opacity: op,
+                        fixed: true,
+                    });
+                    for (let i = 0; i < 5; i++) {
+                        drawRect({
+                            width: width(),
+                            height: 2,
+                            pos: vec2(0, (time() * 500 + i * 150) % height()),
+                            color: rgb(255, 255, 255),
+                            opacity: op * 2,
+                            fixed: true,
+                        });
+                    }
+                }
+
+                // --- MINI-MAP (Topmost) ---
+                if (isMobile) {
+                    const mapW = 100;
+                    const mapH = 56;
+                    const pad = 12;
+                    const mX = width() - mapW - pad;
+                    const mY = 100;
+
+                    drawRect({
+                        width: mapW,
+                        height: mapH,
+                        pos: vec2(mX, mY),
+                        color: rgb(0, 0, 0),
+                        opacity: 0.6,
+                        outline: { color: rgb(0, 255, 255), width: 1 },
+                        fixed: true
+                    });
+
+                    const s = mapW / MAP_WIDTH;
+                    get("enemy").forEach(e => {
+                        drawCircle({
+                            pos: vec2(mX + e.pos.x * s, mY + e.pos.y * s),
+                            radius: 1.5,
+                            color: rgb(255, 50, 50),
+                            fixed: true
+                        });
+                    });
+
+                    const core = get("girl")[0];
+                    if (core) {
+                        drawCircle({
+                            pos: vec2(mX + core.pos.x * s, mY + core.pos.y * s),
+                            radius: 2.5,
+                            color: rgb(0, 150, 255),
+                            fixed: true
+                        });
+                    }
+
+                    drawCircle({
+                        pos: vec2(mX + player.pos.x * s, mY + player.pos.y * s),
+                        radius: 2.5,
+                        color: rgb(0, 255, 100),
+                        fixed: true
                     });
                 }
             }
-        } else {
-            drawCircle({
-                pos: vec2(uiX - 100, uiY),
-                radius: 25,
-                color: rgb(0, 255, 255),
-                opacity: 0.3,
-            });
         }
-
-        drawSprite({
-            sprite: getTurretSprite(gameState.level),
-            pos: vec2(uiX - 100, uiY),
-            width: 40,
-            height: 40,
-            anchor: "center",
-            opacity: gameState.turretCooldownTimer > 0 ? 0.5 : 1
-        });
-
-        drawText({
-            text: "W",
-            size: 16,
-            pos: vec2(uiX - 100, uiY + 32),
-            anchor: "center",
-            font: "monospace",
-            color: rgb(255, 255, 255),
-            outline: { color: rgb(0, 0, 0), width: 1 }
-        });
-
-        drawText({
-            text: `${activeCount} / ${gameState.upgrades.maxTurrets}`,
-            size: 24,
-            pos: vec2(uiX - 60, uiY),
-            anchor: "left",
-            font: "monospace",
-            color: activeCount >= gameState.upgrades.maxTurrets ? rgb(255, 50, 50) : rgb(255, 255, 255),
-        });
-
-        // Jamming Screen Effect
-        if (gameState.jammingTimer > 0) {
-            const op = wave(0.05, 0.15, time() * 20); // Static flicker
-            drawRect({
-                width: width(),
-                height: height(),
-                pos: vec2(0, 0),
-                color: rgb(200, 200, 255),
-                opacity: op,
-                fixed: true,
-            });
-            for (let i = 0; i < 5; i++) {
-                drawRect({
-                    width: width(),
-                    height: 2,
-                    pos: vec2(0, (time() * 500 + i * 150) % height()),
-                    color: rgb(255, 255, 255),
-                    opacity: op * 2,
-                    fixed: true,
-                });
-            }
-        }
-
-        // --- MINI-MAP (Drawn LAST to be on top of EVERYTHING) ---
-        if (isMobile) {
-            const mapW = 100;
-            const mapH = 56;
-            const pad = 12;
-            const mX = width() - mapW - pad;
-            const mY = 100;
-
-            drawRect({
-                width: mapW,
-                height: mapH,
-                pos: vec2(mX, mY),
-                color: rgb(0, 0, 0),
-                opacity: 0.6,
-                outline: { color: rgb(0, 255, 255), width: 1 },
-                fixed: true
-            });
-
-            const s = mapW / MAP_WIDTH;
-            get("enemy").forEach(e => {
-                drawCircle({
-                    pos: vec2(mX + e.pos.x * s, mY + e.pos.y * s),
-                    radius: 1.5,
-                    color: rgb(255, 50, 50),
-                    fixed: true
-                });
-            });
-
-            const core = get("girl")[0];
-            if (core) {
-                drawCircle({
-                    pos: vec2(mX + core.pos.x * s, mY + core.pos.y * s),
-                    radius: 2.5,
-                    color: rgb(0, 150, 255),
-                    fixed: true
-                });
-            }
-
-            drawCircle({
-                pos: vec2(mX + player.pos.x * s, mY + player.pos.y * s),
-                radius: 2.5,
-                color: rgb(0, 255, 100),
-                fixed: true
-            });
-        }
-    });
+    ]);
 
 
     // Touch / Mouse Controls
