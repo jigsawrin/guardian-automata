@@ -24,33 +24,53 @@ kaboom({
     pixelDensity: window.devicePixelRatio, // Retina support
 });
 
-// Load Sprites
+// --- CRITICAL ASSETS (Loaded upfront) ---
 loadSprite("title_logo", "assets/title_logo.png");
 loadSprite("girl", "assets/girl.png");
-loadSprite("wide_map", "assets/wide_map_b64.png");
-loadSprite("player", "assets/player_b64.png");
-loadSprite("enemy", "assets/enemy.png");
-loadSprite("scrap", "assets/scrap.png");
-loadSprite("battery", "assets/battery.png");
-loadSprite("explosion", "assets/explosion.png");
-loadSprite("obs_ruins", "assets/obs_ruins.png");
-loadSprite("obs_car", "assets/obs_car.png");
-loadSprite("obs_playground", "assets/obs_playground.png");
-loadSprite("obs_ground", "assets/obs_ground.png");
-loadSprite("turret", "assets/new_turret.png");
-loadSprite("turret_lvl1", "assets/turret_lvl1.png");
-loadSprite("turret_lvl5", "assets/turret_lvl5.png");
-loadSprite("turret_lvl10", "assets/turret_lvl10.png");
-loadSprite("turret_lvl20", "assets/turret_lvl20.png");
-loadSprite("turret_lvl30", "assets/turret_lvl30.png");
-loadSprite("turret_lvl40", "assets/turret_lvl40.png");
-loadSprite("turret_lvl50", "assets/turret_lvl50.png");
-loadSprite("enemy_warp", "assets/enemy_warp.png");
-loadSprite("enemy_jammer", "assets/enemy_jammer.png");
-loadSprite("drone", "assets/drone.png");
-loadSprite("enemy_assassin", "assets/enemy_assassin.png");
-loadSprite("wall", "assets/wall.png");
-loadSprite("heal_bot", "assets/heal_bot.png");
+loadSound("bgm_title", "assets/bgm_title.mp3");
+
+// --- DEFERRED ASSETS (Loaded while user is on Title/Intro) ---
+let gameAssetsLoaded = false;
+function loadGameAssets() {
+    if (gameAssetsLoaded) return;
+    console.log("Lazy loading game assets...");
+
+    // Sprites
+    loadSprite("wide_map", "assets/wide_map_b64.png");
+    loadSprite("player", "assets/player_b64.png");
+    loadSprite("enemy", "assets/enemy.png");
+    loadSprite("scrap", "assets/scrap.png");
+    loadSprite("battery", "assets/battery.png");
+    loadSprite("explosion", "assets/explosion.png");
+    loadSprite("obs_ruins", "assets/obs_ruins.png");
+    loadSprite("obs_car", "assets/obs_car.png");
+    loadSprite("obs_playground", "assets/obs_playground.png");
+    loadSprite("obs_ground", "assets/obs_ground.png");
+    loadSprite("turret", "assets/new_turret.png");
+    loadSprite("turret_lvl1", "assets/turret_lvl1.png");
+    loadSprite("turret_lvl5", "assets/turret_lvl5.png");
+    loadSprite("turret_lvl10", "assets/turret_lvl10.png");
+    loadSprite("turret_lvl20", "assets/turret_lvl20.png");
+    loadSprite("turret_lvl30", "assets/turret_lvl30.png");
+    loadSprite("turret_lvl40", "assets/turret_lvl40.png");
+    loadSprite("turret_lvl50", "assets/turret_lvl50.png");
+    loadSprite("enemy_warp", "assets/enemy_warp.png");
+    loadSprite("enemy_jammer", "assets/enemy_jammer.png");
+    loadSprite("drone", "assets/drone.png");
+    loadSprite("enemy_assassin", "assets/enemy_assassin.png");
+    loadSprite("wall", "assets/wall.png");
+    loadSprite("heal_bot", "assets/heal_bot.png");
+    loadSprite("obs_large", "assets/obs_large.png");
+    loadSprite("obs_character", "assets/obs_character.png");
+    loadSprite("obs_tall", "assets/obs_tall.png");
+
+    // Sounds
+    loadSound("bgm_day", "assets/bgm_day.mp3");
+    loadSound("bgm_night", "assets/bgm_night.mp3");
+    loadSound("bgm_gameover", "assets/bgm_gameover.mp3");
+
+    gameAssetsLoaded = true;
+}
 
 export function getTurretSprite(level) {
     if (level >= 50) return "turret_lvl50";
@@ -61,15 +81,6 @@ export function getTurretSprite(level) {
     if (level >= 5) return "turret_lvl5";
     return "turret_lvl1";
 }
-loadSprite("obs_large", "assets/obs_large.png");
-loadSprite("obs_character", "assets/obs_character.png");
-loadSprite("obs_tall", "assets/obs_tall.png");
-
-// Load Sounds
-loadSound("bgm_title", "assets/bgm_title.mp3");
-loadSound("bgm_day", "assets/bgm_day.mp3");
-loadSound("bgm_night", "assets/bgm_night.mp3");
-loadSound("bgm_gameover", "assets/bgm_gameover.mp3");
 
 // Game State Class/Object
 const gameState = {
@@ -126,6 +137,7 @@ const debugWaveSkip = () => {
 };
 
 scene("intro", () => {
+    loadGameAssets();
     add([
         text("CLICK TO START", { size: isMobile ? 24 : 32, font: "monospace" }),
         pos(width() / 2, height() / 2),
@@ -137,6 +149,7 @@ scene("intro", () => {
 });
 
 scene("start", () => {
+    loadGameAssets();
     if (gameState.currentBgm) { gameState.currentBgm.stop(); gameState.currentBgm = null; }
     gameState.currentBgm = play("bgm_title", { loop: true, volume: 0.5 });
     add([sprite("title_logo"), pos(width() / 2, height() / 2 - 120), anchor("center"), scale(0.8)]);
