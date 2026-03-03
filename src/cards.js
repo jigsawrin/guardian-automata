@@ -1,3 +1,6 @@
+import { sounds } from './audio.js';
+import { spawnDecoy } from './entities.js';
+
 export const UPGRADE_CARDS = [
     {
         id: "turret_hp",
@@ -150,7 +153,10 @@ export const UPGRADE_CARDS = [
         id: "holographic_decoy",
         title: "💠 ホログラフィック・デコイ",
         desc: "拠点の前に囮（デコイ）を設置します。敵の視線を引きつけますが、一定回数攻撃を受けると消滅します。",
-        effect: (gs) => { gs.upgrades.holographicDecoy = 1; },
+        effect: (gs) => { 
+            gs.upgrades.holographicDecoy = 1; 
+            spawnDecoy(gs, sounds);
+        },
         condition: (gs) => gs.level >= 25 && gs.upgrades.holographicDecoy === 0
     },
     {
