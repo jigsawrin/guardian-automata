@@ -377,14 +377,14 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     });
 
     onDraw(() => {
-        // Mobile MINI-MAP Support
+        // Mobile MINI-MAP Support (Fixed UI Space)
         if (isMobile) {
             const mapW = 100;
             const mapH = 56;
             const pad = 12;
-            const screenTopLeft = camPos().sub(width() / 2, height() / 2);
-            const mX = screenTopLeft.x + width() - mapW - pad;
-            const mY = screenTopLeft.y + 80;
+            // Draw in screen-space (no camPos offset)
+            const mX = width() - mapW - pad;
+            const mY = 80;
 
             // Map Background
             drawRect({
@@ -394,7 +394,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 color: rgb(0, 0, 0),
                 opacity: 0.6,
                 outline: { color: rgb(0, 255, 255), width: 1 },
-                z: 3000
+                fixed: true, // Use fixed UI space
+                z: 5000
             });
 
             const s = mapW / MAP_WIDTH;
@@ -405,7 +406,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     pos: vec2(mX + e.pos.x * s, mY + e.pos.y * s),
                     radius: 1.5,
                     color: rgb(255, 50, 50),
-                    z: 3001
+                    fixed: true,
+                    z: 5001
                 });
             });
 
@@ -416,7 +418,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     pos: vec2(mX + core.pos.x * s, mY + core.pos.y * s),
                     radius: 2.5,
                     color: rgb(0, 150, 255),
-                    z: 3002
+                    fixed: true,
+                    z: 5002
                 });
             }
 
@@ -425,7 +428,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 pos: vec2(mX + player.pos.x * s, mY + player.pos.y * s),
                 radius: 2.5,
                 color: rgb(0, 255, 100),
-                z: 3003
+                fixed: true,
+                z: 5003
             });
         }
 
