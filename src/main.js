@@ -996,9 +996,10 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     destroy(t);
                     return;
                 }
-            }
-        }
-    });
+            } // End if closest
+        } // End if enemies.length > 0
+    } // End if t.timer >= effectiveFireRate
+});
 
     // Helper function to apply damage to an enemy, considering shields and handling death
     const applyDamage = (e, dmg, isHit = true) => {

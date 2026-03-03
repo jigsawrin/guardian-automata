@@ -720,3 +720,38 @@ export function spawnHealBot(gameState, sounds) {
 
     return bot;
 }
+
+export function spawnDecoy(gameState, sounds) {
+    if (get("decoy").length > 0) return;
+
+    const girl = get("girl")[0];
+    if (!girl) return;
+
+    // Spawn point: slightly in front of the core to intercept enemies
+    const spawnPos = vec2(girl.pos.x + 120, girl.pos.y);
+
+    const d = add([
+        sprite("girl", { width: 320, height: 320 }),
+        pos(spawnPos),
+        anchor("center"),
+        scale(0.8),
+        color(100, 200, 255),
+        opacity(0.6),
+        area(),
+        z(115),
+        "decoy",
+        {
+            hp: 15,
+            maxHp: 15,
+        }
+    ]);
+
+    // Holographic FX
+    d.onUpdate(() => {
+        if (gameState.paused) return;
+        d.opacity = wave(0.4, 0.7, time() * 8);
+        d.pos.y = spawnPos.y + Math.sin(time() * 4) * 5;
+    });
+
+    return d;
+}
