@@ -9,8 +9,9 @@ import { initDebugUI } from './debug.js';
 
 initDebugUI();
 
-// Orientation detection for Mobile Portrait support
-const isMobile = window.innerWidth < 800 || (window.innerHeight > window.innerWidth);
+// Robust Mobile/Tablet detection
+const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const isMobile = isMobileDevice && (window.innerHeight > window.innerWidth || window.innerWidth < 800);
 const viewWidth = isMobile ? 360 : MAP_WIDTH;
 const viewHeight = isMobile ? 640 : MAP_HEIGHT;
 

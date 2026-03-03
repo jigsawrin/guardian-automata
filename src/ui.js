@@ -7,8 +7,9 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
     console.assert(Array.isArray(cards), "showUpgradePicker: cards must be an array");
     gameState.paused = true;
 
-    // Accurate detection: narrow screen OR portrait orientation
-    const isMobile = window.innerWidth < 800 || (window.innerHeight > window.innerWidth);
+    // Robust Mobile/Tablet detection
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile = isMobileDevice && (window.innerHeight > window.innerWidth || window.innerWidth < 800);
     const pickerW = isMobile ? width() * 0.98 : 900;
     const pickerH = isMobile ? height() * 0.95 : 560;
 
