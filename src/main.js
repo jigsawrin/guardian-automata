@@ -200,10 +200,12 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     gameState.currentWave = startWave;
     add([sprite("wide_map", { width: MAP_WIDTH, height: MAP_HEIGHT }), pos(0, 0), z(-1)]);
 
-    // Performance Optimization: Cache enemies globally for the current frame
+    // Performance Optimization: Cache entities globally for the current frame
     let frameEnemies = [];
+    let frameResources = [];
     onUpdate(() => {
         frameEnemies = get("enemy");
+        frameResources = get("resource");
     });
 
     // Grid System
@@ -654,57 +656,59 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         const coreY = MAP_HEIGHT / 2;
         let targetPos = vec2(CORE_X, coreY + (e.pos.x < 300 ? 0 : (e.targetOffset || 0)));
         let dir = vec2(-1, 0);
-        if (e.path && e.path.length > 0) {
-            if (e.pos.dist(e.path[0]) < 25) { e.path.shift(); if (e.path.length > 0) targetPos = e.path[0]; }
-            else targetPos = e.path[0];
-            const diff = targetPos.sub(e.pos);
-            if (diff.len() > 0.001) dir = diff.unit();
-        } else { if (rand() < 0.05) e.trigger("recalc_path"); }
-
-        if (dir.x < -0.1) e.flipX = true; else if (dir.x > 0.1) e.flipX = false;
-
-        // Optimization: Raw math separation (NO VECTOR ALLOCATIONS)
-        const ex = e.pos.x;
-        const ey = e.pos.y;
-        let sepX = 0;
-        let sepY = 0;
-
-        for (let i = 0; i < frameEnemies.length; i++) {
-            const other = frameEnemies[i];
-            if (other === e || !other.exists()) continue;
-            const ox = other.pos.x;
-            const oy = other.pos.y;
-            const dx = ex - ox;
-            const dy = ey - oy;
-            const distSq = dx * dx + dy * dy;
-
-            if (distSq < 2500 && distSq > 0.1) { // dist < 50
-                const dist = Math.sqrt(distSq);
-                sepX += (dx / dist) * 0.8;
-                sepY += (dy / dist) * 0.8;
+        if (!gameState.paused) {
+            if (e.path && e.path.length > 0) {
+                if (e.pos.dist(e.path[0]) < 25) { 
+                    e.path.shift(); 
+                    if (e.path.length > 0) targetPos = e.path[0]; 
+                } else {
+                    targetPos = e.path[0];
+                }
+                const diff = targetPos.sub(e.pos);
+                if (diff.len() > 0.001) dir = diff.unit();
+            } else { 
+                if (rand() < 0.05) e.trigger("recalc_path"); 
             }
-        }
-        dir = vec2(dir.x + sepX + rand(-0.5, 0.5), dir.y + sepY + rand(-0.5, 0.5));
 
-        const corePos = vec2(CORE_X, MAP_HEIGHT / 2);
-        if (e.is("ranged") && e.pos.dist(corePos) < e.stopDistance) {
-            if (!gameState.paused) {
+            if (dir.x < -0.1) e.flipX = true; else if (dir.x > 0.1) e.flipX = false;
+
+            // Optimization: Raw math separation (NO VECTOR ALLOCATIONS)
+            const ex = e.pos.x;
+            const ey = e.pos.y;
+            let sepX = 0;
+            let sepY = 0;
+
+            for (let i = 0; i < frameEnemies.length; i++) {
+                const other = frameEnemies[i];
+                if (other === e || !other.exists()) continue;
+                const ox = other.pos.x;
+                const oy = other.pos.y;
+                const dx = ex - ox;
+                const dy = ey - oy;
+                const distSq = dx * dx + dy * dy;
+
+                if (distSq < 2500 && distSq > 0.1) { // dist < 50
+                    const dist = Math.sqrt(distSq);
+                    sepX += (dx / dist) * 0.8;
+                    sepY += (dy / dist) * 0.8;
+                }
+            }
+            dir = vec2(dir.x + sepX + rand(-0.5, 0.5), dir.y + sepY + rand(-0.5, 0.5));
+
+            const corePos = vec2(CORE_X, MAP_HEIGHT / 2);
+            if (e.is("ranged") && e.pos.dist(corePos) < e.stopDistance) {
                 e.reloadTimer -= delta;
                 if (e.reloadTimer <= 0) { 
                     spawnMortar(e.pos, corePos, girl, girlHpFill, () => go("gameover", { finalWave: gameState.currentWave })); 
                     e.reloadTimer = 5.0; 
                 }
+                return;
             }
-            return;
-        }
-        if (e.is("boss")) { 
-            if (!gameState.paused) {
+            if (e.is("boss")) { 
                 e.stepTimer += delta; 
                 if (e.stepTimer >= 1.2) { sounds.bossStep(); e.stepTimer = 0; } 
             }
-        }
 
-        if (!gameState.paused) {
             const moveDir = dir.unit();
             if (!isNaN(moveDir.x) && !isNaN(moveDir.y)) {
                 e.move(moveDir.scale(e.speed));
@@ -1119,34 +1123,43 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             return;
         }
 
-        // Separation from other resources
-        const others = get("resource");
-        let separationVec = vec2(0, 0);
-        for (const other of others) {
+        // Separation from other resources (Optimized with frameResources and raw math)
+        const rx = r.pos.x;
+        const ry = r.pos.y;
+        let sepX = 0;
+        let sepY = 0;
+
+        for (let i = 0; i < frameResources.length; i++) {
+            const other = frameResources[i];
             if (other === r || !other.exists()) continue;
-            const d = r.pos.dist(other.pos);
-            if (Number.isFinite(d) && d < 35 && d > 0.1) { // Separation threshold
-                const diff = r.pos.sub(other.pos);
-                const push = diff.unit();
-                const force = 120 * (1 - d / 35);
-                if (Number.isFinite(push.x) && Number.isFinite(push.y)) {
-                    separationVec = separationVec.add(push.scale(force));
-                }
+            const ox = other.pos.x;
+            const oy = other.pos.y;
+            const dx = rx - ox;
+            const dy = ry - oy;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < 1225 && distSq > 0.1) { // 35px threshold
+                const dist = Math.sqrt(distSq);
+                const force = 120 * (1 - dist / 35);
+                sepX += (dx / dist) * force;
+                sepY += (dy / dist) * force;
             }
         }
-        if (separationVec.len() > 0 && Number.isFinite(separationVec.x) && Number.isFinite(separationVec.y)) {
-            r.move(separationVec);
+        if (sepX !== 0 || sepY !== 0) {
+            r.move(sepX, sepY);
         }
 
         // Attraction to player: Use additive modifier
         const pickupDist = (gameState.upgrades.pickupRadius || 100) * (gameState.upgrades.pickupRadiusMod || 1.0);
-        const distToPlayer = r.pos.dist(player.pos);
-        if (Number.isFinite(distToPlayer) && distToPlayer < pickupDist && distToPlayer > 0.1) {
-            const pullDir = player.pos.sub(r.pos).unit();
+        const playerPos = player.pos;
+        const pdx = playerPos.x - rx;
+        const pdy = playerPos.y - ry;
+        const pDistSq = pdx * pdx + pdy * pdy;
+
+        if (pDistSq < pickupDist * pickupDist && pDistSq > 0.1) {
+            const pDist = Math.sqrt(pDistSq);
             const pullForce = 350;
-            if (Number.isFinite(pullDir.x) && Number.isFinite(pullDir.y)) {
-                r.move(pullDir.scale(pullForce));
-            }
+            r.move((pdx / pDist) * pullForce, (pdy / pDist) * pullForce);
         }
     });
 

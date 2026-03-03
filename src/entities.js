@@ -21,6 +21,7 @@ export function dropResource(p, level = 1) {
         area(),
         anchor("center"),
         z(20),
+        lifespan(30, { fade: 2 }),
         "resource",
         { type: type }
     ]);
@@ -469,7 +470,7 @@ export function build(type, player, upgrades, level = 1, spriteName = "turret") 
 
 export function spawnDrone(gameState, sounds) {
     const dLimit = gameState.upgrades.drone || 0;
-    if (get("drone").length >= dLimit) return;
+    if (dLimit <= 0 || get("drone").length >= dLimit) return;
 
     const girl = get("girl")[0];
     if (!girl) return;
@@ -585,7 +586,7 @@ export function spawnDrone(gameState, sounds) {
 
 
 export function spawnHealBot(gameState, sounds) {
-    if (get("healBot").length > 0) return;
+    if ((gameState.upgrades.healBot || 0) <= 0 || get("healBot").length > 0) return;
 
     const girl = get("girl")[0];
     if (!girl) return;
