@@ -5,13 +5,6 @@ export const CONTROLS = {
     MOVE_RIGHT: "right",
     BUILD_TURRET: "w",
     SALVAGE: "space"
-export const CONTROLS = {
-    MOVE_UP: "up",
-    MOVE_DOWN: "down",
-    MOVE_LEFT: "left",
-    MOVE_RIGHT: "right",
-    BUILD_TURRET: "w",
-    SALVAGE: "space"
 };
 
 export const TILE_SIZE = 40;
