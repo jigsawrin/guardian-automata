@@ -447,7 +447,7 @@ export function build(type, player, upgrades, level = 1, spriteName = "turret") 
         ]);
         t.add([
             rect(40, 4),
-            pos(0, -45),
+            pos(0, 35),
             color(50, 50, 50),
             outline(2),
             anchor("center"),
@@ -455,7 +455,7 @@ export function build(type, player, upgrades, level = 1, spriteName = "turret") 
         ]);
         t.add([
             rect(40, 4),
-            pos(-20, -45),
+            pos(-20, 35),
             color(0, 255, 100),
             anchor("left"),
             z(110),
