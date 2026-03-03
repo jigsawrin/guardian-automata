@@ -294,8 +294,12 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             camPos(cx, cy);
         }
 
-        player.pos.x = Math.max(60, Math.min(MAP_WIDTH - 60, player.pos.x));
-        player.pos.y = Math.max(130, Math.min(MAP_HEIGHT - 130, player.pos.y));
+        // Universal Boundary Clamping (Responsive)
+        const marginX = 40;
+        const marginYTop = isMobile ? 100 : 130;
+        const marginYBot = isMobile ? 60 : 130;
+        player.pos.x = Math.max(marginX, Math.min(MAP_WIDTH - marginX, player.pos.x));
+        player.pos.y = Math.max(marginYTop, Math.min(MAP_HEIGHT - marginYBot, player.pos.y));
 
         if (gameState.turretCooldownTimer > 0) gameState.turretCooldownTimer -= dt();
         if (gameState.jammingTimer > 0) gameState.jammingTimer -= dt();
@@ -488,8 +492,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (gameState.paused) return;
         const mPos = isMobile ? toWorld(mousePos()) : mousePos();
 
-        // Check for click on UI or invalid area
-        if (mPos.y < 80 || mPos.y > height() - 88) return;
+        // Check for click on UI or invalid area (More permissive on world coordinates)
+        if (mPos.y < 40 || mPos.y > MAP_HEIGHT - 40) return;
 
         const now = time();
         const timeSinceLastTap = now - player.lastTapTime;
