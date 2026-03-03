@@ -222,8 +222,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     ]);
 
     const hudLevel = add([
-        text("LEVEL 1", { size: 20, font: "monospace" }),
-        pos(20, 68),
+        text("LEVEL 1", { size: isMobile ? 18 : 20, font: "monospace" }),
+        pos(20, isMobile ? 35 : 68),
         anchor("left"),
         fixed(),
         z(500),
@@ -232,9 +232,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     ]);
 
     const waveCounterLabel = add([
-        text("WAVE: 1", { size: 24, font: "monospace" }),
-        pos(width() - 20, 65),
-        anchor("right"),
+        text("WAVE: 1", { size: isMobile ? 18 : 24, font: "monospace" }),
+        pos(isMobile ? width() / 2 : width() - 20, isMobile ? 65 : 65),
+        anchor(isMobile ? "center" : "right"),
         fixed(),
         z(500),
         color(255, 255, 0),
@@ -245,8 +245,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     gameState.phaseLabel = add([text("DAY", { size: 48, font: "monospace" }), pos(width() / 2, height() / 2 - 100), anchor("center"), opacity(0), fixed(), z(200)]);
 
     gameState.phaseIndicator = add([
-        text("1日目：昼", { size: 32, font: "monospace" }),
-        pos(width() / 2, 40),
+        text("1日目：昼", { size: isMobile ? 22 : 32, font: "monospace" }),
+        pos(width() / 2, isMobile ? 35 : 40),
         anchor("center"),
         fixed(),
         z(500),
@@ -255,8 +255,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     ]);
 
     const dayTimerLabel = add([
-        text("", { size: 24, font: "monospace" }),
-        pos(width() - 20, 40),
+        text("", { size: isMobile ? 18 : 24, font: "monospace" }),
+        pos(width() - 20, isMobile ? 35 : 40),
         anchor("right"),
         fixed(),
         z(500),

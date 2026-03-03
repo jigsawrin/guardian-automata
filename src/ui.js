@@ -23,8 +23,8 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
     ]);
 
     picker.add([
-        text("LEVEL UP!", { size: isMobile ? 54 : 36, font: "monospace" }),
-        pos(0, isMobile ? -pickerH / 2 + 70 : -220),
+        text("LEVEL UP!", { size: isMobile ? 42 : 36, font: "monospace" }),
+        pos(0, isMobile ? -pickerH / 2 + 60 : -220),
         anchor("center"),
         color(0, 255, 255),
         outline(2, rgb(0, 0, 0))
@@ -60,8 +60,8 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
 
         const titleText = typeof card.title === 'function' ? card.title(gameState) : card.title;
         cardBg.add([
-            text(titleText, { size: isMobile ? 28 : 22, width: cardW - 30, font: "monospace" }),
-            pos(isMobile ? -cardW / 2 + 20 : 0, isMobile ? -40 : -130),
+            text(titleText, { size: isMobile ? 22 : 22, width: cardW - 30, font: "monospace" }),
+            pos(isMobile ? -cardW / 2 + 20 : 0, isMobile ? -35 : -130),
             anchor(isMobile ? "left" : "center"),
             color(255, 255, 255),
             outline(2, rgb(0, 0, 0))
@@ -69,8 +69,8 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
 
         const descText = typeof card.desc === 'function' ? card.desc(gameState) : card.desc;
         cardBg.add([
-            text(descText, { size: isMobile ? 20 : 16, width: cardW - 30, font: "monospace" }),
-            pos(isMobile ? -cardW / 2 + 20 : 0, isMobile ? 20 : 0),
+            text(descText, { size: isMobile ? 14 : 16, width: cardW - 30, font: "monospace" }),
+            pos(isMobile ? -cardW / 2 + 20 : 0, isMobile ? 15 : 0),
             anchor(isMobile ? "left" : "center"),
             color(200, 200, 200),
             outline(1, rgb(0, 0, 0))
