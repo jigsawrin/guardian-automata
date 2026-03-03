@@ -105,8 +105,7 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
     });
 }
 
-export function showBanner(bannerTextContent, bgColor, onFinish) {
-    const isMobile = window.innerHeight > window.innerWidth;
+export function showBanner(bannerTextContent, bgColor, onFinish, isMobile = false) {
     const bannerBg = add([
         rect(width(), isMobile ? 60 : 100),
         pos(width(), height() / 2 - (isMobile ? 30 : 50)),
@@ -116,7 +115,11 @@ export function showBanner(bannerTextContent, bgColor, onFinish) {
         z(1000)
     ]);
     const bannerText = add([
-        text(bannerTextContent, { size: isMobile ? 24 : 48, font: "monospace", width: width() - 40 }),
+        text(bannerTextContent, { 
+            size: isMobile ? 24 : 48, 
+            font: "monospace", 
+            width: isMobile ? width() - 40 : undefined 
+        }),
         pos(width(), height() / 2),
         anchor("center"),
         color(255, 255, 255),
@@ -124,12 +127,12 @@ export function showBanner(bannerTextContent, bgColor, onFinish) {
         z(1001)
     ]);
 
-    tween(width(), width() / 2, 0.5, (v) => {
+    tween(width() + width() / 2, width() / 2, 0.5, (v) => {
         bannerBg.pos.x = v - width() / 2;
         bannerText.pos.x = v;
     }, easings.easeOutQuad).onEnd(() => {
-        wait(1, () => {
-            tween(width() / 2, -width(), 0.5, (v) => {
+        wait(1.5, () => {
+            tween(width() / 2, -width() / 2, 0.5, (v) => {
                 bannerBg.pos.x = v - width() / 2;
                 bannerText.pos.x = v;
             }, easings.easeInQuad).onEnd(() => {
