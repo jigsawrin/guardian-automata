@@ -729,7 +729,7 @@ export function spawnDecoy(gameState, sounds) {
 
     // Spawn point: Randomly at top or bottom edge, further right in front of core
     // Target area: x around 400-500, y near 40 or height()-120
-    const edgeY = rand() < 0.5 ? 100 : (height() - 180);
+    const edgeY = rand() < 0.5 ? 150 : (height() - 200);
     const spawnPos = vec2(1100, edgeY);
 
     const d = add([

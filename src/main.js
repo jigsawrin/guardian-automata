@@ -653,8 +653,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             return;
         }
 
-        // Boundary Clamp (Stay within playable bands)
-        e.pos.y = clamp(e.pos.y, 40, height() - 100);
+        // Boundary Clamp (Stay within playable bands - avoid XP bar at top)
+        e.pos.y = clamp(e.pos.y, 120, height() - 120);
 
         const coreY = MAP_HEIGHT / 2;
         let targetPos = vec2(CORE_X, coreY + (e.pos.x < 300 ? 0 : (e.targetOffset || 0)));
