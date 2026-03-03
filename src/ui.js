@@ -6,8 +6,12 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
     console.assert(gameState && typeof gameState.level === 'number', "showUpgradePicker: gameState must be an object");
     console.assert(Array.isArray(cards), "showUpgradePicker: cards must be an array");
     gameState.paused = true;
+    const isMobile = width() < 800; // Detect narrow screen
+    const pickerW = isMobile ? width() * 0.95 : 900;
+    const pickerH = isMobile ? height() * 0.9 : 500;
+
     const picker = add([
-        rect(900, 500),
+        rect(pickerW, pickerH),
         pos(width() / 2, height() / 2),
         color(10, 10, 20, 0.95),
         anchor("center"),
@@ -17,8 +21,8 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
     ]);
 
     picker.add([
-        text("LEVEL UP! 強化を選択せよ", { size: 32, font: "monospace" }),
-        pos(0, -200),
+        text("LEVEL UP!", { size: isMobile ? 48 : 32, font: "monospace" }),
+        pos(0, isMobile ? -pickerH / 2 + 60 : -200),
         anchor("center"),
         color(0, 255, 255)
     ]);
@@ -34,10 +38,16 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
     const choices = shuffled.slice(0, 3);
 
     choices.forEach((card, i) => {
-        const x = -300 + i * 300;
+        // Vertical stack for mobile, horizontal for PC
+        const x = isMobile ? 0 : (-300 + i * 300);
+        const y = isMobile ? (-pickerH / 2 + 180 + i * 140) : 20;
+
+        const cardW = isMobile ? pickerW - 40 : 260;
+        const cardH = isMobile ? 120 : 350;
+
         const cardBg = picker.add([
-            rect(260, 350),
-            pos(x, 20),
+            rect(cardW, cardH),
+            pos(x, y),
             color(40, 40, 60),
             anchor("center"),
             area(),
@@ -47,17 +57,17 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
 
         const titleText = typeof card.title === 'function' ? card.title(gameState) : card.title;
         cardBg.add([
-            text(titleText, { size: 20, width: 220, font: "monospace" }),
-            pos(0, -120),
-            anchor("center"),
+            text(titleText, { size: isMobile ? 24 : 20, width: cardW - 20, font: "monospace" }),
+            pos(isMobile ? -cardW / 2 + 10 : 0, isMobile ? -35 : -120),
+            anchor(isMobile ? "left" : "center"),
             color(255, 255, 255)
         ]);
 
         const descText = typeof card.desc === 'function' ? card.desc(gameState) : card.desc;
         cardBg.add([
-            text(descText, { size: 14, width: 220, font: "monospace" }),
-            pos(0, 0),
-            anchor("center"),
+            text(descText, { size: isMobile ? 18 : 14, width: cardW - 20, font: "monospace" }),
+            pos(isMobile ? -cardW / 2 + 10 : 0, isMobile ? 15 : 0),
+            anchor(isMobile ? "left" : "center"),
             color(200, 200, 200)
         ]);
 
