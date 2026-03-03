@@ -60,9 +60,9 @@ function loadGameAssets() {
     loadSprite("enemy_jammer", "assets/enemy_jammer.png");
     loadSprite("drone", "assets/drone.png");
     loadSprite("enemy_assassin", "assets/enemy_assassin.png");
-    loadSprite("wall", "assets/wall.png");
     loadSprite("heal_bot", "assets/heal_bot.png");
     loadSprite("obs_large", "assets/obs_large.png");
+    // loadSprite("wall", "assets/wall.png");
     // loadSprite("obs_character", "assets/obs_character.png");
     // loadSprite("obs_tall", "assets/obs_tall.png");
 
@@ -236,7 +236,19 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         let w = 2, h = 2;
         if (block.type === "large") { w = 4; h = 4; } else if (block.type === "tall") { w = 2; h = 5; }
         updateGridRect(grid, block.x, block.y, w, h, 1);
-        add([sprite("obs_" + block.type, { width: w * TILE_SIZE, height: h * TILE_SIZE }), pos(block.x * TILE_SIZE, block.y * TILE_SIZE), area(), body({ isStatic: true }), "obstacle", z(10), { obsType: block.type }]);
+        const obsSprite = "obs_" + block.type;
+        const useFallback = block.type === "character" || block.type === "tall";
+        
+        add([
+            useFallback ? rect(w * TILE_SIZE, h * TILE_SIZE) : sprite(obsSprite, { width: w * TILE_SIZE, height: h * TILE_SIZE }),
+            pos(block.x * TILE_SIZE, block.y * TILE_SIZE),
+            useFallback ? color(80, 80, 100) : null,
+            area(),
+            body({ isStatic: true }),
+            "obstacle",
+            z(10),
+            { obsType: block.type }
+        ]);
     }
 
     // Components (Anchored to World Y for AI stability)
