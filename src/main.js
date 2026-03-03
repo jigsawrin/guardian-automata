@@ -654,9 +654,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             return;
         }
 
-        // Boundary Clamp (Stay within playable bands - avoid XP bar at top)
-        e.pos.y = clamp(e.pos.y, 120, height() - 120);
-
         const coreY = MAP_HEIGHT / 2;
         let targetPos = vec2(CORE_X, coreY + (e.pos.x < 300 ? 0 : (e.targetOffset || 0)));
         const decoys = get("decoy");
@@ -682,6 +679,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             e.wasTargetingDecoy = false;
             e.trigger("recalc_path");
         }
+
+        // 1. Clamp targetPos itself (AI Intent) to stay withinplayable bands
+        targetPos.y = clamp(targetPos.y, 130, height() - 130);
 
         let dir = vec2(-1, 0);
         if (!gameState.paused) {
@@ -724,8 +724,15 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
                     if (distSq < 2000 && distSq > 0.1) { // dist < ~45
                         const dist = Math.sqrt(distSq);
-                        sepX += (dx / dist) * 0.6;
-                        sepY += (dy / dist) * 0.6;
+                        let forceX = (dx / dist) * 0.6;
+                        let forceY = (dy / dist) * 0.6;
+
+                        // 2. Dampen forces that push OUT of bounds
+                        if (ey < 140 && forceY < 0) forceY *= 0.1;
+                        if (ey > height() - 140 && forceY > 0) forceY *= 0.1;
+
+                        sepX += forceX;
+                        sepY += forceY;
                     }
                 }
             }
@@ -750,10 +757,16 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
             const moveDir = dir.unit();
             if (!isNaN(moveDir.x) && !isNaN(moveDir.y)) {
-                e.move(moveDir.scale(e.speed));
+                // 3. Ensure a minimum forward movement if trapped vertically
+                let finalMove = moveDir.scale(e.speed);
+                if (Math.abs(finalMove.x) < 5) finalMove.x = -10; 
+                e.move(finalMove);
             } else {
                 e.move(vec2(-1, 0).scale(e.speed)); // Fallback move
             }
+
+            // 4. Final Position Clamp (Safety net)
+            e.pos.y = clamp(e.pos.y, 120, height() - 120);
         }
 
         const engX = e.is("boss") ? (e.pos.x - 250) : e.pos.x;
