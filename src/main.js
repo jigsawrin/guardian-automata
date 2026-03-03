@@ -347,7 +347,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 color: rgb(0, 0, 0),
                 opacity: 0.6,
                 outline: { color: rgb(0, 255, 255), width: 1 },
-                z: 2000
+                z: 3000
             });
 
             const s = mapW / MAP_WIDTH;
@@ -358,7 +358,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     pos: vec2(mX + e.pos.x * s, mY + e.pos.y * s),
                     radius: 1.5,
                     color: rgb(255, 50, 50),
-                    z: 2001
+                    z: 3001
                 });
             });
 
@@ -369,7 +369,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     pos: vec2(mX + core.pos.x * s, mY + core.pos.y * s),
                     radius: 2.5,
                     color: rgb(0, 150, 255),
-                    z: 2002
+                    z: 3002
                 });
             }
 
@@ -378,7 +378,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 pos: vec2(mX + player.pos.x * s, mY + player.pos.y * s),
                 radius: 2.5,
                 color: rgb(0, 255, 100),
-                z: 2003
+                z: 3003
             });
         }
 
