@@ -738,6 +738,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
         const engX = e.is("boss") ? (e.pos.x - 250) : e.pos.x;
         if (engX <= ENGAGEMENT_X) {
+            if (e.is("boss")) girl.hp = 0; else girl.hp -= 15;
+            girlHpFill.width = Math.max(0, (girl.hp / girl.maxHp) * 100);
             shake(20); sounds.damage(); createExplosion(e.pos, gameState.level); sounds.explode(gameState.level); destroy(e);
             if (girl.hp <= 0) go("gameover", { finalWave: gameState.currentWave });
         }
