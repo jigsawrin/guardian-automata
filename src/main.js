@@ -297,9 +297,12 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
 
         // Universal Boundary Clamping (Responsive Sync with Visual Lines)
-        // Sprite height is 80, so half-height 40. Lines at 88 and height-88.
-        const marginYTop = 88 + 40;
-        const marginYBot = 88 + 40;
+        // HUD lines are at 88px. Sprite height 80 (radius 40).
+        // For feet to touch line top: player.y + 40 = world_line_y.
+        // On mobile (640 height), world_line_y = 632. So player.y = 592.
+        // MAP_HEIGHT (720) - 592 = 128.
+        const marginYTop = 128;
+        const marginYBot = 128;
         player.pos.x = Math.max(40, Math.min(MAP_WIDTH - 40, player.pos.x));
         player.pos.y = Math.max(marginYTop, Math.min(MAP_HEIGHT - marginYBot, player.pos.y));
 
@@ -380,9 +383,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
 
         const activeCount = get("turret").length;
-        const uiX = width() / 2;
-        // The bottom line is at height() - 88. HUD center is at height() - 44.
-        const uiY = height() - 44;
+        const screenTopLeft = camPos().sub(width() / 2, height() / 2);
+        const uiX = screenTopLeft.x + width() / 2;
+        const uiY = screenTopLeft.y + height() - 44;
         // Turret UI Icon
         drawCircle({
             pos: vec2(uiX - 100, uiY),
@@ -493,10 +496,12 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     // Touch / Mouse Controls
     onClick(() => {
         if (gameState.paused) return;
-        const mPos = isMobile ? toWorld(mousePos()) : mousePos();
 
-        // Check for click on UI or invalid area (Strict sync with lines)
-        if (mPos.y < 88 || mPos.y > (isMobile ? height() : height()) - 88) return;
+        // Check for click on UI or invalid area (Always use screen-space for UI checks)
+        const mScreenPos = mousePos();
+        if (mScreenPos.y < 88 || mScreenPos.y > height() - 88) return;
+
+        const mPos = isMobile ? toWorld(mScreenPos) : mScreenPos;
 
         const now = time();
         const timeSinceLastTap = now - player.lastTapTime;
@@ -592,7 +597,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         // Boundary Clamp (Stay within playable bands)
         e.pos.y = clamp(e.pos.y, 40, height() - 100);
 
-        let targetPos = vec2(CORE_X, height() / 2 + (e.pos.x < 300 ? 0 : (e.targetOffset || 0)));
+        const coreY = MAP_HEIGHT / 2;
+        let targetPos = vec2(CORE_X, coreY + (e.pos.x < 300 ? 0 : (e.targetOffset || 0)));
         let dir = vec2(-1, 0);
         if (e.path && e.path.length > 0) {
             if (e.pos.dist(e.path[0]) < 25) { e.path.shift(); if (e.path.length > 0) targetPos = e.path[0]; }
@@ -626,9 +632,10 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
         dir = vec2(dir.x + sepX + rand(-0.5, 0.5), dir.y + sepY + rand(-0.5, 0.5));
 
-        if (e.is("ranged") && e.pos.dist(vec2(CORE_X, height() / 2)) < e.stopDistance) {
+        const corePos = vec2(CORE_X, MAP_HEIGHT / 2);
+        if (e.is("ranged") && e.pos.dist(corePos) < e.stopDistance) {
             e.reloadTimer -= dt();
-            if (e.reloadTimer <= 0) { spawnMortar(e.pos, vec2(CORE_X, height() / 2), girl, girlHpFill, () => go("gameover", { finalWave: gameState.currentWave })); e.reloadTimer = 5.0; }
+            if (e.reloadTimer <= 0) { spawnMortar(e.pos, corePos, girl, girlHpFill, () => go("gameover", { finalWave: gameState.currentWave })); e.reloadTimer = 5.0; }
             return;
         }
         if (e.is("boss")) { e.stepTimer += dt(); if (e.stepTimer >= 1.2) { sounds.bossStep(); e.stepTimer = 0; } }
