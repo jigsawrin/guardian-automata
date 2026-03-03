@@ -42,19 +42,34 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete, is
         const y = isMobile ? (-pickerH / 2 + 200 + i * 160) : 40;
 
         const mockGS = (l) => ({ level: l, upgrades: { homing: 1, drone: 1, healBot: 1, omegaStrike: 0, roboCircus: 0 } });
-        const isOverload = card.condition && card.condition(mockGS(50)) && !card.condition(mockGS(49));
+        const isOverload = card.isOverload || (card.condition && card.condition(mockGS(50)) && !card.condition(mockGS(49)));
+        const isRare = card.isRare || false;
         const cardW = isMobile ? pickerW - 40 : 260;
         const cardH = isMobile ? 140 : 380;
+
+        let bgColor = rgb(40, 40, 60);
+        let outlineColor = rgb(100, 100, 150);
+        let outlineWidth = 2;
+
+        if (isOverload) {
+            bgColor = rgb(60, 50, 20);
+            outlineColor = rgb(255, 215, 0);
+            outlineWidth = 4;
+        } else if (isRare) {
+            bgColor = rgb(40, 20, 60);
+            outlineColor = rgb(200, 50, 255);
+            outlineWidth = 3;
+        }
 
         const cardBg = picker.add([
             rect(cardW, cardH),
             pos(x, y),
-            color(isOverload ? rgb(60, 50, 20) : rgb(40, 40, 60)),
+            color(bgColor),
             anchor("center"),
             area(),
-            outline(isOverload ? 4 : 2, isOverload ? rgb(255, 215, 0) : rgb(100, 100, 150)),
+            outline(outlineWidth, outlineColor),
             "card_btn",
-            { isOverload }
+            { isOverload, isRare }
         ]);
 
         if (isOverload) {

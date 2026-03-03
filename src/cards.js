@@ -103,6 +103,7 @@ export const UPGRADE_CARDS = [
         id: "robo_circus",
         title: "🌌 ロボサーカス",
         desc: "追尾弾が2発同時に射出され、変幻自在な軌道で敵を殲滅します。",
+        isRare: true,
         effect: (gs) => {
             gs.upgrades.roboCircus += 1;
         },
@@ -118,6 +119,7 @@ export const UPGRADE_CARDS = [
         id: "drone",
         title: "🛸 近接防衛ドローン",
         desc: "自動で敵を追尾し攻撃するドローンが出現します。攻撃のたびに耐久力が減少します。",
+        isRare: true,
         effect: (gs) => { 
             gs.upgrades.drone = 1; 
             spawnDrone(gs, sounds);
@@ -128,6 +130,7 @@ export const UPGRADE_CARDS = [
         id: "heal_bot",
         title: "🤖 メンテナンス・ボット",
         desc: "損傷したタレットを自動で修理する自立型ロボットを配備します。敵の攻撃を受けません。",
+        isRare: true,
         effect: (gs) => { gs.upgrades.healBot = 1; },
         condition: (gs) => gs.upgrades.healBot === 0 && gs.level >= 15
     },
