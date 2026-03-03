@@ -660,19 +660,23 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         const corePos = vec2(CORE_X, coreY);
         const decoys = get("decoy");
         
-        let targetPos = vec2(CORE_X, coreY + (e.pos.x < 300 ? 0 : (e.targetOffset || 0)));
-        
         // Target Decoy if it exists and is within a reasonable "distraction" range
+        let isDecoyTarget = false;
         if (decoys.length > 0 && e.pos.x > CORE_X) {
             const decoy = decoys[0];
             if (e.pos.dist(decoy.pos) < 600) {
                 targetPos = decoy.pos.add(vec2(0, e.targetOffset || 0));
+                isDecoyTarget = true;
             }
         }
 
         let dir = vec2(-1, 0);
         if (!gameState.paused) {
-            if (e.path && e.path.length > 0) {
+            // Priority: If targeting decoy, ignore pre-calculated path to core
+            if (isDecoyTarget) {
+                const diff = targetPos.sub(e.pos);
+                if (diff.len() > 0.001) dir = diff.unit();
+            } else if (e.path && e.path.length > 0) {
                 if (e.pos.dist(e.path[0]) < 25) { 
                     e.path.shift(); 
                     if (e.path.length > 0) targetPos = e.path[0]; 
