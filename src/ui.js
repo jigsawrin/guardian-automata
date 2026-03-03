@@ -46,6 +46,8 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete) {
         const y = isMobile ? (-pickerH / 2 + 200 + i * 160) : 40;
 
         const isOverload = card.condition && card.condition({ level: 50 }) && !card.condition({ level: 49 });
+        const cardW = isMobile ? pickerW - 40 : 260;
+        const cardH = isMobile ? 140 : 380;
 
         const cardBg = picker.add([
             rect(cardW, cardH),
