@@ -1,6 +1,6 @@
 import { sounds } from './audio.js';
 import { showBanner } from './ui.js';
-import { spawnEnemy, spawnDrone, spawnHealBot } from './entities.js';
+import { spawnEnemy, spawnDrone, spawnHealBot, spawnDecoy } from './entities.js';
 
 export function createSystems(gameState) {
     console.assert(gameState && typeof gameState.currentWave === 'number', "createSystems: gameState must be an object");
