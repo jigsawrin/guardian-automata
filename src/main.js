@@ -9,9 +9,9 @@ import { initDebugUI } from './debug.js';
 
 initDebugUI();
 
-// Robust Mobile/Tablet detection
-const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-const isMobile = isMobileDevice && (window.innerHeight > window.innerWidth || window.innerWidth < 800);
+// Aspect Ratio Detection for Desktop/Mobile and Embedded (iframe) support
+const isPortrait = window.innerHeight > window.innerWidth;
+const isMobile = isPortrait; // Use aspect ratio to decide layout
 const viewWidth = isMobile ? 360 : MAP_WIDTH;
 const viewHeight = isMobile ? 640 : MAP_HEIGHT;
 
