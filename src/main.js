@@ -42,11 +42,11 @@ function loadGameAssets() {
     loadSprite("scrap", "assets/scrap.png");
     loadSprite("battery", "assets/battery.png");
     loadSprite("explosion", "assets/explosion.png");
-    loadSprite("obs_ruins", "assets/obs_ruins.png");
-    loadSprite("obs_car", "assets/obs_car.png");
-    loadSprite("obs_playground", "assets/obs_playground.png");
-    loadSprite("obs_ground", "assets/obs_ground.png");
-    loadSprite("turret", "assets/new_turret.png");
+    // loadSprite("obs_ruins", "assets/obs_ruins.png"); // Unused
+    // loadSprite("obs_car", "assets/obs_car.png"); // Unused
+    // loadSprite("obs_playground", "assets/obs_playground.png"); // Unused
+    // loadSprite("obs_ground", "assets/obs_ground.png"); // Unused
+    // loadSprite("turret", "assets/new_turret.png"); // Redundant (lvl1 is used)
     loadSprite("turret_lvl1", "assets/turret_lvl1.png");
     loadSprite("turret_lvl5", "assets/turret_lvl5.png");
     loadSprite("turret_lvl10", "assets/turret_lvl10.png");
