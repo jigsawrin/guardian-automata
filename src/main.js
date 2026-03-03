@@ -31,7 +31,6 @@ loadSound("bgm_title", "assets/bgm_title.mp3");
 
 // --- DEFERRED ASSETS (Loaded while user is on Title/Intro) ---
 let gameAssetsLoaded = false;
-let loadProgress = 0;
 let totalAssets = 30; // Estimated count of deferred assets
 function loadGameAssets() {
     if (gameAssetsLoaded) return;
@@ -72,10 +71,6 @@ function loadGameAssets() {
     loadSound("bgm_day", "assets/bgm_day.mp3");
     loadSound("bgm_night", "assets/bgm_night.mp3");
     loadSound("bgm_gameover", "assets/bgm_gameover.mp3");
-
-    onLoadingUpdate((p) => {
-        loadProgress = p;
-    });
 
     onLoad(() => {
         console.log(`All assets loaded in ${((performance.now() - startTime) / 1000).toFixed(2)}s`);
@@ -164,8 +159,9 @@ scene("intro", () => {
     ]);
 
     onUpdate(() => {
-        if (loadProgress < 1) {
-            status.text = `LOADING ASSETS... ${Math.round(loadProgress * 100)}%`;
+        const prog = loadProgress();
+        if (prog < 1) {
+            status.text = `LOADING ASSETS... ${Math.round(prog * 100)}%`;
         } else {
             status.text = "ASSETS READY";
             status.opacity = wave(0.2, 0.5, time() * 2);
@@ -174,12 +170,12 @@ scene("intro", () => {
     });
 
     onClick(() => { 
-        if (loadProgress < 1) return; // Prevent start before assets
+        if (loadProgress() < 1) return; // Prevent start before assets
         if (audioCtx.state === 'suspended') audioCtx.resume(); 
         go("start"); 
     });
     onKeyPress((key) => { 
-        if (loadProgress < 1) return;
+        if (loadProgress() < 1) return;
         if (key === "p") debugWaveSkip(); 
         else { if (audioCtx.state === 'suspended') audioCtx.resume(); go("start"); } 
     });
