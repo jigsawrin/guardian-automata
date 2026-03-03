@@ -101,12 +101,12 @@ export function showUpgradePicker(gameState, player, girl, cards, onComplete, is
         ]);
 
         cardBg.onHover(() => {
-            cardBg.color = rgb(60, 60, 90);
+            cardBg.color = isOverload ? rgb(80, 70, 30) : (isRare ? rgb(60, 30, 90) : rgb(60, 60, 90));
             cardBg.outline.color = rgb(0, 255, 255);
         });
         cardBg.onHoverEnd(() => {
-            cardBg.color = rgb(40, 40, 60);
-            cardBg.outline.color = rgb(100, 100, 150);
+            cardBg.color = bgColor;
+            cardBg.outline.color = outlineColor;
         });
         cardBg.onClick(() => {
             if (picker.isClosing) return;

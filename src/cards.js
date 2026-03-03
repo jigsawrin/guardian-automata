@@ -166,6 +166,7 @@ export const UPGRADE_CARDS = [
         id: "holographic_decoy",
         title: "💠 ホログラフィック・デコイ",
         desc: "拠点の前に囮（デコイ）を設置します。敵の視線を引きつけますが、一定回数攻撃を受けると消滅します。",
+        isRare: true,
         effect: (gs) => { 
             gs.upgrades.holographicDecoy = 1; 
             spawnDecoy(gs, sounds);
