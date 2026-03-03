@@ -21,7 +21,7 @@ kaboom({
     height: viewHeight,
     letterbox: true,
     texFilter: "nearest",
-    pixelDensity: window.devicePixelRatio, // Retina support
+    pixelDensity: Math.min(window.devicePixelRatio, 2), // Limit to 2x for performance
 });
 
 // --- CRITICAL ASSETS (Loaded upfront) ---
@@ -31,9 +31,13 @@ loadSound("bgm_title", "assets/bgm_title.mp3");
 
 // --- DEFERRED ASSETS (Loaded while user is on Title/Intro) ---
 let gameAssetsLoaded = false;
+let loadProgress = 0;
+let totalAssets = 30; // Estimated count of deferred assets
 function loadGameAssets() {
     if (gameAssetsLoaded) return;
-    console.log("Lazy loading game assets...");
+    gameAssetsLoaded = true; // Set early to prevent double trigger
+    console.log("Lazy loading game assets started...");
+    const startTime = performance.now();
 
     // Sprites
     loadSprite("wide_map", "assets/wide_map_b64.png");
@@ -69,7 +73,13 @@ function loadGameAssets() {
     loadSound("bgm_night", "assets/bgm_night.mp3");
     loadSound("bgm_gameover", "assets/bgm_gameover.mp3");
 
-    gameAssetsLoaded = true;
+    onLoadingUpdate((p) => {
+        loadProgress = p;
+    });
+
+    onLoad(() => {
+        console.log(`All assets loaded in ${((performance.now() - startTime) / 1000).toFixed(2)}s`);
+    });
 }
 
 export function getTurretSprite(level) {
@@ -138,14 +148,41 @@ const debugWaveSkip = () => {
 
 scene("intro", () => {
     loadGameAssets();
-    add([
+    const status = add([
+        text("LOADING...", { size: 16, font: "monospace" }),
+        pos(width() / 2, height() / 2 + 40),
+        anchor("center"),
+        color(150, 150, 150),
+    ]);
+    
+    const clickMsg = add([
         text("CLICK TO START", { size: isMobile ? 24 : 32, font: "monospace" }),
         pos(width() / 2, height() / 2),
         anchor("center"),
         color(255, 255, 255),
+        opacity(0),
     ]);
-    onClick(() => { if (audioCtx.state === 'suspended') audioCtx.resume(); go("start"); });
-    onKeyPress((key) => { if (key === "p") debugWaveSkip(); else { if (audioCtx.state === 'suspended') audioCtx.resume(); go("start"); } });
+
+    onUpdate(() => {
+        if (loadProgress < 1) {
+            status.text = `LOADING ASSETS... ${Math.round(loadProgress * 100)}%`;
+        } else {
+            status.text = "ASSETS READY";
+            status.opacity = wave(0.2, 0.5, time() * 2);
+            clickMsg.opacity = 1;
+        }
+    });
+
+    onClick(() => { 
+        if (loadProgress < 1) return; // Prevent start before assets
+        if (audioCtx.state === 'suspended') audioCtx.resume(); 
+        go("start"); 
+    });
+    onKeyPress((key) => { 
+        if (loadProgress < 1) return;
+        if (key === "p") debugWaveSkip(); 
+        else { if (audioCtx.state === 'suspended') audioCtx.resume(); go("start"); } 
+    });
 });
 
 scene("start", () => {
