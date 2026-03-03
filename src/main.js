@@ -43,7 +43,7 @@ function loadGameAssets() {
     loadSprite("enemy", "assets/enemy.png");
     loadSprite("scrap", "assets/scrap.png");
     loadSprite("battery", "assets/battery.png");
-    loadSprite("explosion", "assets/explosion.png");
+    // loadSprite("explosion", "assets/explosion.png");
     // loadSprite("obs_ruins", "assets/obs_ruins.png"); // Unused
     // loadSprite("obs_car", "assets/obs_car.png"); // Unused
     // loadSprite("obs_playground", "assets/obs_playground.png"); // Unused
@@ -63,8 +63,8 @@ function loadGameAssets() {
     loadSprite("wall", "assets/wall.png");
     loadSprite("heal_bot", "assets/heal_bot.png");
     loadSprite("obs_large", "assets/obs_large.png");
-    loadSprite("obs_character", "assets/obs_character.png");
-    loadSprite("obs_tall", "assets/obs_tall.png");
+    // loadSprite("obs_character", "assets/obs_character.png");
+    // loadSprite("obs_tall", "assets/obs_tall.png");
 
     // Sounds
     loadSound("bgm_day", "assets/bgm_day.mp3");
