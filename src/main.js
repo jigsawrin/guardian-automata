@@ -166,7 +166,7 @@ scene("intro", () => {
         anchor("center"),
         color(150, 150, 150),
     ]);
-    
+
     const clickMsg = add([
         text("CLICK TO START", { size: isMobile ? 24 : 32, font: "monospace" }),
         pos(width() / 2, height() / 2),
@@ -186,15 +186,15 @@ scene("intro", () => {
         }
     });
 
-    onClick(() => { 
+    onClick(() => {
         if (loadProgress() < 1) return; // Prevent start before assets
-        if (audioCtx.state === 'suspended') audioCtx.resume(); 
-        go("start"); 
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        go("start");
     });
-    onKeyPress((key) => { 
+    onKeyPress((key) => {
         if (loadProgress() < 1) return;
-        if (key === "p") debugWaveSkip(); 
-        else { if (audioCtx.state === 'suspended') audioCtx.resume(); go("start"); } 
+        if (key === "p") debugWaveSkip();
+        else { if (audioCtx.state === 'suspended') audioCtx.resume(); go("start"); }
     });
 });
 
@@ -208,11 +208,11 @@ scene("start", () => {
     add([text("BEST RECORD: WAVE " + highScore, { size: 16, font: "monospace" }), pos(width() / 2, height() / 2 + 200), anchor("center"), color(255, 255, 0)]);
     add([text("ver " + GAME_VERSION, { size: 14, font: "monospace" }), pos(width() / 2, height() - 20), anchor("center"), color(150, 150, 150), fixed()]);
     onUpdate(() => startMsg.opacity = wave(0.3, 1, time() * 5));
-    const startGame = () => { 
-        if (audioCtx.state === 'suspended') audioCtx.resume(); 
+    const startGame = () => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         stopAllBgm();
-        sounds.waveStart(); 
-        go("main", { startWave: 1 }); 
+        sounds.waveStart();
+        go("main", { startWave: 1 });
     };
     onKeyPress("space", startGame);
     onClick(startGame);
@@ -350,11 +350,11 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     const systems = createSystems(gameState);
     gameState.phaseLabel = add([
-        text("DAY", { size: isMobile ? 28 : 48, font: "monospace", width: isMobile ? width() - 20 : undefined }), 
-        pos(width() / 2, height() / 2 - 100), 
-        anchor("center"), 
-        opacity(0), 
-        fixed(), 
+        text("DAY", { size: isMobile ? 28 : 48, font: "monospace", width: isMobile ? width() - 20 : undefined }),
+        pos(width() / 2, height() / 2 - 100),
+        anchor("center"),
+        opacity(0),
+        fixed(),
         z(1100)
     ]);
 
@@ -531,6 +531,21 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     color: activeCount >= gameState.upgrades.maxTurrets ? rgb(255, 50, 50) : rgb(255, 255, 255),
                     fixed: true
                 });
+
+                // Enemy Counter (Remaining / Total)
+                if (gameState.phase === "night" || gameState.phase === "transition") {
+                    const remainingEnemies = (gameState.enemiesInWave - gameState.enemiesSpawned) + frameEnemies.filter(e => e.exists()).length;
+                    drawText({
+                        text: `敵: ${remainingEnemies} / ${gameState.enemiesInWave}`,
+                        size: 20,
+                        pos: vec2(uiX + 60, uiY),
+                        anchor: "left",
+                        font: "monospace",
+                        color: rgb(255, 200, 0),
+                        outline: { color: rgb(0, 0, 0), width: 1 },
+                        fixed: true
+                    });
+                }
 
                 // Jamming Screen Effect
                 if (gameState.jammingTimer > 0) {
@@ -709,7 +724,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         const coreY = MAP_HEIGHT / 2;
         let targetPos = vec2(CORE_X, coreY + (e.pos.x < 300 ? 0 : (e.targetOffset || 0)));
         const decoys = get("decoy");
-        
+
         // Target Decoy if it exists and is within a reasonable "distraction" range
         let isDecoyTarget = false;
         if (decoys.length > 0 && e.pos.x > CORE_X) {
@@ -744,20 +759,20 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 const diff = targetPos.sub(e.pos);
                 if (diff.len() > 0.1) dir = diff.unit();
             } else if (e.path && e.path.length > 0) {
-                if (e.pos.dist(e.path[0]) < 25) { 
-                    e.path.shift(); 
-                    if (e.path.length > 0) targetPos = e.path[0]; 
+                if (e.pos.dist(e.path[0]) < 25) {
+                    e.path.shift();
+                    if (e.path.length > 0) targetPos = e.path[0];
                 } else {
                     targetPos = e.path[0];
                 }
                 const diff = targetPos.sub(e.pos);
                 if (diff.len() > 0.1) dir = diff.unit();
-            } else { 
-                if (rand() < 0.05) e.trigger("recalc_path"); 
+            } else {
+                if (rand() < 0.05) e.trigger("recalc_path");
             }
 
             if (dir.x < -0.1) e.flipX = true; else if (dir.x > 0.1) e.flipX = false;
-            
+
             // Apply separation only if not extremely close to target (prevents vibration at destination)
             let sepX = 0;
             let sepY = 0;
@@ -788,7 +803,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     }
                 }
             }
-            
+
             // Reduced randomness when near target
             const randAmp = distToTarget < 50 ? 0.1 : 0.5;
             dir = vec2(dir.x + sepX + rand(-randAmp, randAmp), dir.y + sepY + rand(-randAmp, randAmp));
@@ -796,22 +811,22 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             const corePos = vec2(CORE_X, MAP_HEIGHT / 2);
             if (e.is("ranged") && e.pos.dist(corePos) < e.stopDistance) {
                 e.reloadTimer -= delta;
-                if (e.reloadTimer <= 0) { 
-                    spawnMortar(e.pos, corePos, girl, girlHpFill, () => go("gameover", { finalWave: gameState.currentWave })); 
-                    e.reloadTimer = 5.0; 
+                if (e.reloadTimer <= 0) {
+                    spawnMortar(e.pos, corePos, girl, girlHpFill, () => go("gameover", { finalWave: gameState.currentWave }));
+                    e.reloadTimer = 5.0;
                 }
                 return;
             }
-            if (e.is("boss")) { 
-                e.stepTimer += delta; 
-                if (e.stepTimer >= 1.2) { sounds.bossStep(); e.stepTimer = 0; } 
+            if (e.is("boss")) {
+                e.stepTimer += delta;
+                if (e.stepTimer >= 1.2) { sounds.bossStep(); e.stepTimer = 0; }
             }
 
             const moveDir = dir.unit();
             if (!isNaN(moveDir.x) && !isNaN(moveDir.y)) {
                 // 3. Ensure a minimum forward movement if trapped vertically
                 let finalMove = moveDir.scale(e.speed);
-                if (Math.abs(finalMove.x) < 5) finalMove.x = -10; 
+                if (Math.abs(finalMove.x) < 5) finalMove.x = -10;
                 e.move(finalMove);
             } else {
                 e.move(vec2(-1, 0).scale(e.speed)); // Fallback move
@@ -851,19 +866,19 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     onCollide("enemy", "decoy", (e, d) => {
         if (gameState.paused) return;
-        
+
         // Damage scaling: Heavy/Boss = 3, Others = 1
         const damage = (e.is("heavy") || e.is("boss")) ? 3 : 1;
-        
+
         d.hp -= damage;
-        
+
         // Enemy effects
         createExplosion(e.pos, gameState.level);
         sounds.explode(gameState.level);
         // v3.9.7: Decoys only deal 1 damage to bosses as requested
-        const enemyDmg = e.is("boss") ? 1 : 15; 
-        applyDamage(e, enemyDmg, true); 
-        
+        const enemyDmg = e.is("boss") ? 1 : 15;
+        applyDamage(e, enemyDmg, true);
+
         if (d.hp <= 0) {
             createExplosion(d.pos, gameState.level);
             sounds.explode();
@@ -912,7 +927,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (gameState.paused || gameState.jammingTimer > 0) return;
         const delta = Math.min(dt(), 0.1);
         t.timer += delta;
-        
+
         // Sonic Wave Logic (v3.6.0)
         if (gameState.upgrades.sonicWave > 0) {
             t.sonicTimer = (t.sonicTimer || 5.0) - delta;
@@ -942,7 +957,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         const effectiveDmg = t.dmg * gameState.upgrades.turretDmgMod;
 
         if (t.timer >= effectiveFireRate) {
-            const enemies = frameVisibleEnemies; 
+            const enemies = frameVisibleEnemies;
             if (enemies.length > 0) {
                 let closest = null;
                 let minDist = effectiveRange;
@@ -950,9 +965,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     let d = t.pos.dist(e.pos);
                     // v3.9.1: Account for sprite size in range check (especially for bosses)
                     const enemySize = (e.width || 80) / 2;
-                    if (d - enemySize < minDist) { 
+                    if (d - enemySize < minDist) {
                         minDist = d - enemySize; // Target closest based on edge
-                        closest = e; 
+                        closest = e;
                     }
                 }
 
@@ -986,178 +1001,178 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                         sounds.laser();
                     } else {
                         // Support for Multi-Shot: Ensure center bullet + side pairs
-                    const shots = 1 + (gameState.upgrades.multiShot * 2);
-                    const spread = 15; // Slightly tighter spread for better concentration
+                        const shots = 1 + (gameState.upgrades.multiShot * 2);
+                        const spread = 15; // Slightly tighter spread for better concentration
 
-                    for (let i = 0; i < shots; i++) {
-                        const diff = closest.pos.sub(firePos);
-                        if (diff.len() < 0.1) continue; // Skip shots if perfectly overlapping
-                        const baseAngle = diff.angle();
-                        const angleOff = (i - (shots - 1) / 2) * spread;
-                        const finalAngle = baseAngle + angleOff;
-                        const d = vec2(Math.cos(finalAngle * Math.PI / 180), Math.sin(finalAngle * Math.PI / 180));
+                        for (let i = 0; i < shots; i++) {
+                            const diff = closest.pos.sub(firePos);
+                            if (diff.len() < 0.1) continue; // Skip shots if perfectly overlapping
+                            const baseAngle = diff.angle();
+                            const angleOff = (i - (shots - 1) / 2) * spread;
+                            const finalAngle = baseAngle + angleOff;
+                            const d = vec2(Math.cos(finalAngle * Math.PI / 180), Math.sin(finalAngle * Math.PI / 180));
 
-                        // Check for Crit
-                        const isCrit = rand() < gameState.upgrades.critChance;
-                        const bulletDmg = isCrit ? (effectiveDmg * 2.5) : effectiveDmg;
-                        const bulletColor = isCrit ? rgb(255, 0, 255) : t.bcol;
+                            // Check for Crit
+                            const isCrit = rand() < gameState.upgrades.critChance;
+                            const bulletDmg = isCrit ? (effectiveDmg * 2.5) : effectiveDmg;
+                            const bulletColor = isCrit ? rgb(255, 0, 255) : t.bcol;
 
-                        // Robo Circus Support: Fire 2 bullets if upgraded
-                        const roboEnabled = gameState.upgrades.roboCircus > 0;
-                        const subShots = roboEnabled ? 2 : 1;
+                            // Robo Circus Support: Fire 2 bullets if upgraded
+                            const roboEnabled = gameState.upgrades.roboCircus > 0;
+                            const subShots = roboEnabled ? 2 : 1;
 
-                        for (let j = 0; j < subShots; j++) {
-                            const subAngle = roboEnabled ? (j === 0 ? -15 : 15) : 0;
-                            const subFinalAngle = finalAngle + subAngle;
-                            const subDir = vec2(Math.cos(subFinalAngle * Math.PI / 180), Math.sin(subFinalAngle * Math.PI / 180));
+                            for (let j = 0; j < subShots; j++) {
+                                const subAngle = roboEnabled ? (j === 0 ? -15 : 15) : 0;
+                                const subFinalAngle = finalAngle + subAngle;
+                                const subDir = vec2(Math.cos(subFinalAngle * Math.PI / 180), Math.sin(subFinalAngle * Math.PI / 180));
 
-                            const isOmega = gameState.upgrades.omegaStrike > 0;
-                            const b = add([
-                                rect((isOmega ? 80 : (isCrit ? 18 : 12)) * gameState.upgrades.bulletSizeMod, (isOmega ? 2000 : (isCrit ? 8 : 4)) * gameState.upgrades.bulletSizeMod),
-                                pos(firePos),
-                                color(isOmega ? rgb(0, 255, 255) : bulletColor),
-                                area({ scale: isOmega ? vec2(1, 1) : vec2(2, 2) }),
-                                rotate(subFinalAngle),
-                                offscreen({ destroy: true, distance: isOmega ? 2000 : 400 }),
-                                "bullet",
-                                z(95),
-                                lifespan(5), // v3.9.3 fix: Prevent infinite orbits/leaks
-                                {
-                                    dmg: isOmega ? 10 : bulletDmg,
-                                    isCrit: isCrit,
-                                    pierce: isOmega ? 999 : gameState.upgrades.pierce,
-                                    homing: isOmega ? 0 : gameState.upgrades.homing,
-                                    homingScanTimer: rand(0, 0.1),
-                                    dir: subDir,
-                                    circus: isOmega ? false : roboEnabled,
-                                    wobbleTime: rand(0, 10),
-                                    ricochet: isOmega ? 0 : gameState.upgrades.ricochet,
-                                    source: "turret",
-                                    isOmega: isOmega
-                                }
-                            ]);
-
-                            if (isOmega) {
-                                // Add a glowing core to the laser
-                                b.add([
-                                    rect(20, 2000),
-                                    anchor("center"),
-                                    color(255, 255, 255),
-                                    z(1)
+                                const isOmega = gameState.upgrades.omegaStrike > 0;
+                                const b = add([
+                                    rect((isOmega ? 80 : (isCrit ? 18 : 12)) * gameState.upgrades.bulletSizeMod, (isOmega ? 2000 : (isCrit ? 8 : 4)) * gameState.upgrades.bulletSizeMod),
+                                    pos(firePos),
+                                    color(isOmega ? rgb(0, 255, 255) : bulletColor),
+                                    area({ scale: isOmega ? vec2(1, 1) : vec2(2, 2) }),
+                                    rotate(subFinalAngle),
+                                    offscreen({ destroy: true, distance: isOmega ? 2000 : 400 }),
+                                    "bullet",
+                                    z(95),
+                                    lifespan(5), // v3.9.3 fix: Prevent infinite orbits/leaks
+                                    {
+                                        dmg: isOmega ? 10 : bulletDmg,
+                                        isCrit: isCrit,
+                                        pierce: isOmega ? 999 : gameState.upgrades.pierce,
+                                        homing: isOmega ? 0 : gameState.upgrades.homing,
+                                        homingScanTimer: rand(0, 0.1),
+                                        dir: subDir,
+                                        circus: isOmega ? false : roboEnabled,
+                                        wobbleTime: rand(0, 10),
+                                        ricochet: isOmega ? 0 : gameState.upgrades.ricochet,
+                                        source: "turret",
+                                        isOmega: isOmega
+                                    }
                                 ]);
-                            }
 
-                            b.onUpdate(() => {
-                                if (gameState.paused) return;
-
-                                // Ricochet (Bounce) Logic
-                                if (b.ricochet > 0) {
-                                    const topLimit = 130;
-                                    const bottomLimit = MAP_HEIGHT - 130;
-                                    if ((b.pos.y < topLimit && b.dir.y < 0) || (b.pos.y > bottomLimit && b.dir.y > 0)) {
-                                        b.dir.y = -b.dir.y;
-                                        b.angle = b.dir.angle();
-                                        b.ricochet--;
-                                        b.pos.y = b.pos.y < topLimit ? topLimit + 2 : bottomLimit - 2;
-                                        if (sounds && sounds.hit) sounds.hit();
-                                    }
+                                if (isOmega) {
+                                    // Add a glowing core to the laser
+                                    b.add([
+                                        rect(20, 2000),
+                                        anchor("center"),
+                                        color(255, 255, 255),
+                                        z(1)
+                                    ]);
                                 }
 
-                                if (gameState.upgrades.homing > 0 && b.source === "turret") {
-                                    if (b.circus) b.wobbleTime += dt() * 15;
+                                b.onUpdate(() => {
+                                    if (gameState.paused) return;
 
-                                    // Optimization: Only lookup target every few frames or if target missing
-                                    b.homingScanTimer = (b.homingScanTimer || 0) - dt();
-
-                                    if (!b.targetEnemy || !b.targetEnemy.exists() || b.targetEnemy.pos.x > width() || b.homingScanTimer <= 0) {
-                                        b.homingScanTimer = 0.1; // Scan 10 times a second
-                                        const targets = frameVisibleEnemies;
-                                        if (targets.length > 0) {
-                                            let targetClosest = null;
-                                            let targetMinDist = 700;
-                                            for (const te of targets) {
-                                                const td = b.pos.dist(te.pos);
-                                                if (td < targetMinDist) { targetMinDist = td; targetClosest = te; }
-                                            }
-                                            b.targetEnemy = targetClosest;
+                                    // Ricochet (Bounce) Logic
+                                    if (b.ricochet > 0) {
+                                        const topLimit = 130;
+                                        const bottomLimit = MAP_HEIGHT - 130;
+                                        if ((b.pos.y < topLimit && b.dir.y < 0) || (b.pos.y > bottomLimit && b.dir.y > 0)) {
+                                            b.dir.y = -b.dir.y;
+                                            b.angle = b.dir.angle();
+                                            b.ricochet--;
+                                            b.pos.y = b.pos.y < topLimit ? topLimit + 2 : bottomLimit - 2;
+                                            if (sounds && sounds.hit) sounds.hit();
                                         }
                                     }
 
-                                    if (b.targetEnemy && b.targetEnemy.exists()) {
-                                        const targetClosest = b.targetEnemy;
-                                        const tx = targetClosest.pos.x;
-                                        const ty = targetClosest.pos.y;
-                                        const bx = b.pos.x;
-                                        const by = b.pos.y;
-                                        const dx = tx - bx;
-                                        const dy = ty - by;
-                                        const distSq = dx * dx + dy * dy;
+                                    if (gameState.upgrades.homing > 0 && b.source === "turret") {
+                                        if (b.circus) b.wobbleTime += dt() * 15;
 
-                                        if (distSq > 0.01) {
-                                            const dist = Math.sqrt(distSq);
-                                            let targetDirX = dx / dist;
-                                            let targetDirY = dy / dist;
+                                        // Optimization: Only lookup target every few frames or if target missing
+                                        b.homingScanTimer = (b.homingScanTimer || 0) - dt();
 
-                                            if (b.circus) {
-                                                const amp = map(dist, 0, 300, 5, 40);
-                                                const wobbleAngle = (Math.atan2(targetDirY, targetDirX) * 180 / Math.PI) + 90 + Math.sin(b.wobbleTime) * amp;
-                                                const wobbleX = Math.cos(wobbleAngle * Math.PI / 180) * 0.6;
-                                                const wobbleY = Math.sin(wobbleAngle * Math.PI / 180) * 0.6;
-                                                const wx = targetDirX + wobbleX;
-                                                const wy = targetDirY + wobbleY;
-                                                const wdist = Math.sqrt(wx * wx + wy * wy);
-                                                if (wdist > 0.001) {
-                                                    targetDirX = wx / wdist;
-                                                    targetDirY = wy / wdist;
+                                        if (!b.targetEnemy || !b.targetEnemy.exists() || b.targetEnemy.pos.x > width() || b.homingScanTimer <= 0) {
+                                            b.homingScanTimer = 0.1; // Scan 10 times a second
+                                            const targets = frameVisibleEnemies;
+                                            if (targets.length > 0) {
+                                                let targetClosest = null;
+                                                let targetMinDist = 700;
+                                                for (const te of targets) {
+                                                    const td = b.pos.dist(te.pos);
+                                                    if (td < targetMinDist) { targetMinDist = td; targetClosest = te; }
                                                 }
+                                                b.targetEnemy = targetClosest;
                                             }
+                                        }
 
-                                            const turnSpeed = map(dist, 0, 600, 60, 10);
-                                            const lerpFactor = dt() * turnSpeed;
-                                            const newDirX = b.dir.x + (targetDirX - b.dir.x) * lerpFactor;
-                                            const newDirY = b.dir.y + (targetDirY - b.dir.y) * lerpFactor;
-                                            const newDist = Math.sqrt(newDirX * newDirX + newDirY * newDirY);
+                                        if (b.targetEnemy && b.targetEnemy.exists()) {
+                                            const targetClosest = b.targetEnemy;
+                                            const tx = targetClosest.pos.x;
+                                            const ty = targetClosest.pos.y;
+                                            const bx = b.pos.x;
+                                            const by = b.pos.y;
+                                            const dx = tx - bx;
+                                            const dy = ty - by;
+                                            const distSq = dx * dx + dy * dy;
 
-                                            if (newDist > 0.001) {
-                                                b.dir = vec2(newDirX / newDist, newDirY / newDist);
-                                                b.angle = b.dir.angle();
+                                            if (distSq > 0.01) {
+                                                const dist = Math.sqrt(distSq);
+                                                let targetDirX = dx / dist;
+                                                let targetDirY = dy / dist;
+
+                                                if (b.circus) {
+                                                    const amp = map(dist, 0, 300, 5, 40);
+                                                    const wobbleAngle = (Math.atan2(targetDirY, targetDirX) * 180 / Math.PI) + 90 + Math.sin(b.wobbleTime) * amp;
+                                                    const wobbleX = Math.cos(wobbleAngle * Math.PI / 180) * 0.6;
+                                                    const wobbleY = Math.sin(wobbleAngle * Math.PI / 180) * 0.6;
+                                                    const wx = targetDirX + wobbleX;
+                                                    const wy = targetDirY + wobbleY;
+                                                    const wdist = Math.sqrt(wx * wx + wy * wy);
+                                                    if (wdist > 0.001) {
+                                                        targetDirX = wx / wdist;
+                                                        targetDirY = wy / wdist;
+                                                    }
+                                                }
+
+                                                const turnSpeed = map(dist, 0, 600, 60, 10);
+                                                const lerpFactor = dt() * turnSpeed;
+                                                const newDirX = b.dir.x + (targetDirX - b.dir.x) * lerpFactor;
+                                                const newDirY = b.dir.y + (targetDirY - b.dir.y) * lerpFactor;
+                                                const newDist = Math.sqrt(newDirX * newDirX + newDirY * newDirY);
+
+                                                if (newDist > 0.001) {
+                                                    b.dir = vec2(newDirX / newDist, newDirY / newDist);
+                                                    b.angle = b.dir.angle();
+                                                }
+                                                // v3.9.3: Snap to target when closing in, especially for large bosses
+                                                const snapDist = targetClosest.is("boss") ? (targetClosest.width / 4) : 20;
+                                                if (dist < snapDist) b.dir = vec2(targetDirX, targetDirY);
                                             }
-                                            // v3.9.3: Snap to target when closing in, especially for large bosses
-                                            const snapDist = targetClosest.is("boss") ? (targetClosest.width / 4) : 20;
-                                            if (dist < snapDist) b.dir = vec2(targetDirX, targetDirY); 
                                         }
                                     }
-                                }
 
-                                const speed = b.homing > 0 ? (b.circus ? 850 : 750) : 1100;
-                                b.move(b.dir.scale(speed));
-                            }); // End b.onUpdate
-                        } // End for subShots
-                    } // End for shots
-                } // End if (closest)
+                                    const speed = b.homing > 0 ? (b.circus ? 850 : 750) : 1100;
+                                    b.move(b.dir.scale(speed));
+                                }); // End b.onUpdate
+                            } // End for subShots
+                        } // End for shots
+                    } // End if (closest)
 
-                sounds.shoot();
+                    sounds.shoot();
 
-                // Consume HP per shot (restored lifetime mechanic)
-                t.hp -= 1;
-                const hpbar = t.get("hpbar")[0];
-                if (hpbar) hpbar.width = (t.hp / t.maxHp) * 40;
+                    // Consume HP per shot (restored lifetime mechanic)
+                    t.hp -= 1;
+                    const hpbar = t.get("hpbar")[0];
+                    if (hpbar) hpbar.width = (t.hp / t.maxHp) * 40;
 
-                if (t.hp <= 0) {
-                    createExplosion(firePos, gameState.level);
-                    sounds.explode(gameState.level);
-                    destroy(t);
-                    return;
-                }
-            } // End if closest
-        } // End if enemies.length > 0
-    } // End if t.timer >= effectiveFireRate
-});
+                    if (t.hp <= 0) {
+                        createExplosion(firePos, gameState.level);
+                        sounds.explode(gameState.level);
+                        destroy(t);
+                        return;
+                    }
+                } // End if closest
+            } // End if enemies.length > 0
+        } // End if t.timer >= effectiveFireRate
+    });
 
     // Helper function to apply damage to an enemy, considering shields and handling death
     const applyDamage = (e, dmg, isHit = true) => {
         if (!e || !e.exists() || e.hp <= 0 || isNaN(dmg)) return;
-        
+
         // v3.8.7: I-Frame Check
         if (e.invulnTimer > 0) return;
 
@@ -1168,7 +1183,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (e.shieldHP > 0) {
             if (isHit) {
                 e.shieldHP -= 1; // Shields block "hits"
-                
+
                 // v3.8.7: Gold Shield I-Frame trigger
                 if (e.isGoldShield) {
                     e.invulnTimer = 0.5;
@@ -1192,7 +1207,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
         // Standard damage
         e.hp -= dmg;
-        
+
         if (e.is("decoy")) {
             if (e.hp <= 0) {
                 createExplosion(e.pos, gameState.level);
@@ -1213,7 +1228,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 createExplosion(diePos, gameState.level);
                 sounds.explode(gameState.level);
                 dropResource(diePos, gameState.level);
-                
+
                 // v4.0.0: Trigger Victory Sequence after W25 Boss death
                 if (isBoss25) {
                     gameState.victoryPending = true; // v4.1.0: Block normal wave clear
@@ -1234,7 +1249,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     });
 
     onCollide("bullet", "enemy", (b, e) => {
-        if (gameState.paused || !b.exists()) return; 
+        if (gameState.paused || !b.exists()) return;
 
         // Calculate effects BEFORE primary damage so they trigger on lethal shots
         const splashEnabled = gameState.upgrades.explosiveRounds > 0 && b.source === "turret";
@@ -1455,7 +1470,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             rect(width(), height()),
             color(0, 0, 0),
             opacity(0),
-            z(6000), 
+            z(6000),
             fixed(),
             "victory_ui"
         ]);
@@ -1466,9 +1481,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             const x = rand(100, width() - 100);
             const y = rand(100, height() - 200);
             const col = choose([rgb(255, 100, 100), rgb(100, 255, 100), rgb(100, 100, 255), rgb(255, 255, 100)]);
-            
+
             createExplosion(vec2(x, y), 5);
-            
+
             for (let i = 0; i < 20; i++) {
                 const angle = rand(0, 360);
                 const dist = rand(20, 100);
@@ -1533,7 +1548,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         wait(1.5, () => tween(0, 1, 1, (v) => eText.opacity = v));
         wait(3, () => {
             tween(0, 1, 0.5, (v) => nextText.opacity = v);
-            
+
             const proceed = () => {
                 cleanup();
                 gameState.paused = false;
@@ -1541,7 +1556,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 gameState.currentWave++; // Advance to 26
                 updateHighScore(gameState.currentWave);
                 gameState.enemiesSpawned = 0;
-                systems.startDay(); 
+                systems.startDay();
             };
 
             const cleanup = () => {
