@@ -249,9 +249,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     // Layouts
     const layouts = [
-        [{ x: 14, y: 6, type: "large" }, { x: 8, y: 4, type: "character" }, { x: 22, y: 10, type: "tall" }, { x: 24, y: 4, type: "character" }],
-        [{ x: 16, y: 5, type: "large" }, { x: 10, y: 4, type: "tall" }, { x: 10, y: 10, type: "tall" }, { x: 24, y: 4, type: "tall" }, { x: 24, y: 10, type: "tall" }],
-        [{ x: 10, y: 6, type: "large" }, { x: 22, y: 6, type: "large" }, { x: 16, y: 4, type: "character" }, { x: 16, y: 13, type: "character" }]
+        [{ x: 14, y: 6, type: "large" }, { x: 8, y: 2, type: "character" }, { x: 22, y: 11, type: "tall" }, { x: 24, y: 4, type: "character" }],
+        [{ x: 16, y: 5, type: "large" }, { x: 10, y: 2, type: "tall" }, { x: 10, y: 11, type: "tall" }, { x: 24, y: 2, type: "tall" }, { x: 24, y: 11, type: "tall" }],
+        [{ x: 10, y: 6, type: "large" }, { x: 22, y: 6, type: "large" }, { x: 16, y: 2, type: "character" }, { x: 16, y: 14, type: "character" }]
     ];
     const currentLayout = choose(layouts);
     for (let block of currentLayout) {
@@ -404,8 +404,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         // For feet to touch line top: player.y + 40 = world_line_y.
         // On mobile (640 height), world_line_y = 632. So player.y = 592.
         // MAP_HEIGHT (720) - 592 = 128.
-        const marginYTop = 100;
-        const marginYBot = 100;
+        const marginYTop = 128;
+        const marginYBot = 128;
         player.pos.x = Math.max(40, Math.min(MAP_WIDTH - 40, player.pos.x));
         player.pos.y = Math.max(marginYTop, Math.min(MAP_HEIGHT - marginYBot, player.pos.y));
 
@@ -751,7 +751,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
 
         // 1. Clamp targetPos itself (AI Intent) to stay withinplayable bands
-        targetPos.y = clamp(targetPos.y, 100, MAP_HEIGHT - 100);
+        targetPos.y = clamp(targetPos.y, 130, MAP_HEIGHT - 130);
 
         let dir = vec2(-1, 0);
         if (!gameState.paused) {
@@ -798,8 +798,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                         let forceY = (dy / dist) * 0.6;
 
                         // 2. Dampen forces that push OUT of bounds
-                        if (ey < 100 && forceY < 0) forceY *= 0.1;
-                        if (ey > MAP_HEIGHT - 100 && forceY > 0) forceY *= 0.1;
+                        if (ey < 140 && forceY < 0) forceY *= 0.1;
+                        if (ey > MAP_HEIGHT - 140 && forceY > 0) forceY *= 0.1;
 
                         sepX += forceX;
                         sepY += forceY;
@@ -836,7 +836,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             }
 
             // 4. Final Position Clamp (Safety net)
-            e.pos.y = clamp(e.pos.y, 90, MAP_HEIGHT - 90);
+            e.pos.y = clamp(e.pos.y, 120, MAP_HEIGHT - 120);
         }
 
         // Core Deadline Check
