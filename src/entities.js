@@ -183,10 +183,10 @@ export function spawnEnemy(gameState, enemiesSpawned) {
     else if (r < rangedProb + warpProb + assassinProb + (currentWave >= 7 ? 0.1 : 0) + heavyProb) type = "heavy";
     else type = "normal";
 
-    // Shielded enemies: Randomly from Wave 6 onwards, fixed 10% chance
+    // Shielded enemies: Randomly from Wave 6 onwards, increased to 40% chance
     let shieldProb = 0;
     if (currentWave >= 6) {
-        shieldProb = 0.1;
+        shieldProb = 0.4;
     }
 
     // Check for "First Spawn" forced shield OR random chance
@@ -199,9 +199,16 @@ export function spawnEnemy(gameState, enemiesSpawned) {
     }
 
     let shieldHP = 0;
+    let isGoldShield = false;
     if (isShielded) {
-        // Scaling HP based on wave
-        shieldHP = currentWave < 5 ? 3 : (2 + Math.floor((currentWave - 5) / 2));
+        // v3.8.3: Gold Shield chance (20% total from W22 onwards)
+        if (currentWave >= 22 && rand() < 0.5) {
+            isGoldShield = true;
+            shieldHP = 1;
+        } else {
+            // Updated Normal Shield HP: 10
+            shieldHP = 10;
+        }
     }
     // Speed: base + wave * scaling (Aggressive)
     // HP: base + floor(wave / 3)
@@ -358,9 +365,9 @@ export function spawnEnemy(gameState, enemiesSpawned) {
         // Visual Barrier
         const shieldVisual = e.add([
             circle(s.w * 0.6), // Slightly larger than enemy
-            color(0, 150, 255),
+            color(isGoldShield ? rgb(255, 215, 0) : rgb(0, 150, 255)),
             opacity(0.3),
-            outline(2, rgb(255, 255, 255)),
+            outline(2, isGoldShield ? rgb(255, 255, 200) : rgb(255, 255, 255)),
             anchor("center"),
             z(-1), // Behind enemy model but inside the object
             "shield_visual"
