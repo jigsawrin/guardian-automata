@@ -205,7 +205,10 @@ export function spawnEnemy(gameState, enemiesSpawned) {
         // Since shieldProb is 0.5, rand() < 0.4 gives 0.5 * 0.4 = 0.2 (20% total)
         if (currentWave >= 22 && rand() < 0.4) {
             isGoldShield = true;
-            shieldHP = 5; // Increased from 1 to 5
+            // v3.8.8: Dynamic Gold HP Scaling
+            if (currentWave >= 26) shieldHP = 5;
+            else if (currentWave >= 24) shieldHP = 3;
+            else shieldHP = 2; // W22-23
         } else {
             // Updated Normal Shield HP: 10
             shieldHP = 10;
