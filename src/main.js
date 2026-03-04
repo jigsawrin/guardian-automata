@@ -87,6 +87,13 @@ export function getTurretSprite(level) {
 }
 
 // Game State Initialization
+const stopAllBgm = () => {
+    if (gameState.currentBgm) {
+        gameState.currentBgm.stop();
+        gameState.currentBgm = null;
+    }
+};
+
 function getInitialGameState() {
     return {
         currentWave: 1,
@@ -144,6 +151,7 @@ const debugWaveSkip = () => {
     const waveNum = parseInt(waveInput);
     if (!isNaN(waveNum) && waveNum > 0) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
+        stopAllBgm();
         sounds.waveStart();
         go("main", { startWave: waveNum });
     }
@@ -191,7 +199,7 @@ scene("intro", () => {
 
 scene("start", () => {
     loadGameAssets();
-    if (gameState.currentBgm) { gameState.currentBgm.stop(); gameState.currentBgm = null; }
+    stopAllBgm();
     gameState.currentBgm = play("bgm_title", { loop: true, volume: 0.5 });
     add([sprite("title_logo"), pos(width() / 2, height() / 2 - 120), anchor("center"), scale(0.8)]);
     add([sprite("girl"), pos(width() / 2, height() / 2 + 50), scale(0.25), anchor("center")]);
@@ -201,7 +209,7 @@ scene("start", () => {
     onUpdate(() => startMsg.opacity = wave(0.3, 1, time() * 5));
     const startGame = () => { 
         if (audioCtx.state === 'suspended') audioCtx.resume(); 
-        if (gameState.currentBgm) { gameState.currentBgm.stop(); gameState.currentBgm = null; }
+        stopAllBgm();
         sounds.waveStart(); 
         go("main", { startWave: 1 }); 
     };
@@ -1493,7 +1501,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 });
 
 scene("gameover", ({ finalWave }) => {
-    if (gameState.currentBgm) gameState.currentBgm.stop();
+    stopAllBgm();
     gameState.currentBgm = play("bgm_gameover", { loop: true, volume: 0.5 });
     add([text("MISSION FAILED", { size: isMobile ? 32 : 48, font: "monospace" }), pos(width() / 2, height() / 2 - 50), anchor("center"), color(255, 50, 50)]);
     add([text("FINAL WAVE: " + finalWave, { size: 24, font: "monospace" }), pos(width() / 2, height() / 2 + 20), anchor("center")]);
