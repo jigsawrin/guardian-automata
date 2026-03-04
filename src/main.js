@@ -338,15 +338,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         outline(2, rgb(0, 0, 0))
     ]);
 
-    const waveCounterLabel = add([
-        text("WAVE: 1", { size: isMobile ? 22 : 24, font: "monospace" }),
-        pos(isMobile ? width() / 2 : width() - 20, isMobile ? 55 : 65),
-        anchor(isMobile ? "center" : "right"),
-        fixed(),
-        z(1100),
-        color(255, 255, 0),
-        outline(2, rgb(0, 0, 0))
-    ]);
 
     const systems = createSystems(gameState);
     gameState.phaseLabel = add([
@@ -370,7 +361,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     const dayTimerLabel = add([
         text("", { size: isMobile ? 18 : 24, font: "monospace" }),
-        pos(width() - 10, isMobile ? 15 : 40),
+        pos(isMobile ? width() - 10 : width() - 20, isMobile ? 15 : 95),
         anchor("right"),
         fixed(),
         z(1100),
@@ -1318,7 +1309,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         const xpRatio = gameState.xp / gameState.xpToNext;
         xpBarFill.width = xpRatio * width();
         hudLevel.text = "LEVEL " + gameState.level;
-        waveCounterLabel.text = "WAVE: " + gameState.currentWave;
 
         if (gameState.phase === "day") {
             dayTimerLabel.text = "NEXT: " + Math.ceil(gameState.dayTimer) + "s";
