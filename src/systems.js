@@ -45,6 +45,7 @@ export function createSystems(gameState) {
                 else count += 6;
             }
             gameState.enemiesInWave = (gameState.currentWave === 8) ? 1 : count;
+            if (gameState.currentWave >= 22) gameState.enemiesInWave += 50;
             gameState.enemiesSpawned = 0;
             gameState.currentBgm = play("bgm_night", { loop: true, volume: 0.5 });
 
