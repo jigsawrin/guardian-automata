@@ -1439,6 +1439,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 if (girl.hp <= 0) gameOver();
             }
         });
+    }
+
     function showVictorySequence() {
         gameState.paused = true;
         if (gameState.currentBgm) {
