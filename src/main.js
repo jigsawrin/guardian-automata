@@ -539,9 +539,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     });
 
                     drawText({
-                        text: `: ${remainingEnemies} / ${gameState.enemiesInWave}`,
+                        text: isMobile ? `${remainingEnemies}` : `: ${remainingEnemies} / ${gameState.enemiesInWave}`,
                         size: 24,
-                        pos: vec2(uiX + 65, uiY),
+                        pos: vec2(isMobile ? uiX + 55 : uiX + 65, uiY),
                         anchor: "left",
                         font: "monospace",
                         color: rgb(255, 200, 0),
