@@ -28,6 +28,20 @@ export function createSystems(gameState) {
     }
 
     function startNight() {
+        // Calculate enemy count early to avoid UI flicker during WARNING banner
+        let count = 10;
+        for (let i = 2; i <= gameState.currentWave; i++) {
+            if (i % 3 === 0) count += 10;
+            else count += 6;
+        }
+        if (gameState.currentWave === 8 || gameState.currentWave === 16 || gameState.currentWave === 25) {
+            gameState.enemiesInWave = 1;
+        } else {
+            gameState.enemiesInWave = count;
+            if (gameState.currentWave >= 22) gameState.enemiesInWave += 50;
+        }
+        gameState.enemiesSpawned = 0;
+
         gameState.phase = "transition";
         if (gameState.currentBgm) { gameState.currentBgm.stop(); gameState.currentBgm = null; }
         sounds.warningIn();
@@ -36,21 +50,6 @@ export function createSystems(gameState) {
             sounds.warningOut();
             get("girl")[0]?.trigger("start_night");
             gameState.phase = "night";
-            // Calculate enemy count based on new logic:
-            // Base: Wave 1=10, Wave 2=16 (+6)
-            // From Wave 3: If wave is multiple of 3, +10. Else +6.
-            let count = 10;
-            for (let i = 2; i <= gameState.currentWave; i++) {
-                if (i % 3 === 0) count += 10;
-                else count += 6;
-            }
-            if (gameState.currentWave === 8 || gameState.currentWave === 16 || gameState.currentWave === 25) {
-                gameState.enemiesInWave = 1;
-            } else {
-                gameState.enemiesInWave = count;
-                if (gameState.currentWave >= 22) gameState.enemiesInWave += 50;
-            }
-            gameState.enemiesSpawned = 0;
             gameState.currentBgm = play("bgm_night", { loop: true, volume: 0.5 });
 
             gameState.phaseLabel.text = "WAVE " + gameState.currentWave + ": 拠点を死守せよ";
