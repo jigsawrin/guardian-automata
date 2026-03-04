@@ -416,7 +416,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (gameState.phase === "day" && !gameState.paused) {
             gameState.dayTimer -= delta;
             if (gameState.dayTimer <= 0) systems.startNight();
-        } else if (gameState.phase === "night" && gameState.enemiesSpawned >= gameState.enemiesInWave && get("enemy").length === 0 && !gameState.victoryPending) {
+        } else if (gameState.phase === "night" && gameState.enemiesSpawned >= gameState.enemiesInWave && get("enemy").length === 0 && !gameState.victoryPending && girl.hp > 0 && !gameState.gameOverPending) {
             gameState.phase = "transition";
             console.log("Wave " + gameState.currentWave + " cleared. Transitioning...");
             if (gameState.currentBgm) gameState.currentBgm.stop();
@@ -841,14 +841,16 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
 
         // Core Deadline Check
-        if (e.pos.x < CORE_X + 60) {
+        if (e.pos.x < CORE_X + 90) {
             if (e.isMega) {
                 // v3.8.9: Mega Boss One-Hit Game Over
-                if (girl.exists()) {
+                if (girl.exists() && !gameState.gameOverPending) {
+                    gameState.gameOverPending = true;
                     shake(50);
                     sounds.explode(100);
                     createExplosion(girl.pos, 200);
                     destroy(girl);
+                    girl.hp = 0; // Ensure HP is 0 for victory checks
                     // Force game over after dramatic pause
                     wait(1.5, () => {
                         go("gameover", { finalWave: gameState.currentWave });
@@ -861,7 +863,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             sounds.hit();
             girl.hp -= 5;
             girlHpFill.width = Math.max(0, (girl.hp / girl.maxHp) * 100);
-            if (girl.hp <= 0) {
+            if (girl.hp <= 0 && !gameState.gameOverPending) {
+                gameState.gameOverPending = true;
                 go("gameover", { finalWave: gameState.currentWave });
             }
             destroy(e);
