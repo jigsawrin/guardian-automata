@@ -199,7 +199,12 @@ scene("start", () => {
     add([text("BEST RECORD: WAVE " + highScore, { size: 16, font: "monospace" }), pos(width() / 2, height() / 2 + 200), anchor("center"), color(255, 255, 0)]);
     add([text("ver " + GAME_VERSION, { size: 14, font: "monospace" }), pos(width() / 2, height() - 20), anchor("center"), color(150, 150, 150), fixed()]);
     onUpdate(() => startMsg.opacity = wave(0.3, 1, time() * 5));
-    const startGame = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); sounds.waveStart(); go("main", { startWave: 1 }); };
+    const startGame = () => { 
+        if (audioCtx.state === 'suspended') audioCtx.resume(); 
+        if (gameState.currentBgm) { gameState.currentBgm.stop(); gameState.currentBgm = null; }
+        sounds.waveStart(); 
+        go("main", { startWave: 1 }); 
+    };
     onKeyPress("space", startGame);
     onClick(startGame);
     onKeyPress("p", debugWaveSkip);
