@@ -788,7 +788,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (engX <= ENGAGEMENT_X) {
             if (e.is("boss")) girl.hp = 0; else girl.hp -= 15;
             girlHpFill.width = Math.max(0, (girl.hp / girl.maxHp) * 100);
-            shake(20); sounds.damage(); createExplosion(e.pos, gameState.level); sounds.explode(gameState.level); destroy(e);
+            shake(8); sounds.damage(); createExplosion(e.pos, gameState.level); sounds.explode(gameState.level); destroy(e);
             if (girl.hp <= 0) go("gameover", { finalWave: gameState.currentWave });
         }
     });
@@ -1161,7 +1161,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
         if (b.isCrit) {
             sounds.explode(); // Flashier sound for crit
-            shake(5);
+            shake(2);
         }
 
         applyDamage(e, b.dmg, true);
@@ -1336,7 +1336,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 createExplosion(m.pos, gameState.level);
                 sounds.explode(gameState.level);
                 girl.hp -= 20;
-                shake(10);
+                shake(4);
                 destroy(m);
 
                 // Damage drones in explosion radius

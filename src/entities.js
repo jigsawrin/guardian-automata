@@ -107,7 +107,7 @@ export function spawnMortar(start, target, girl, girlHpFill, gameOverCallback) {
         if (t >= 1) {
             createExplosion(target);
             sounds.explode();
-            shake(10);
+            shake(4);
             girl.hp -= 20;
             girlHpFill.width = Math.max(0, (girl.hp / girl.maxHp) * 100);
             if (girl.hp <= 0) gameOverCallback();
@@ -804,7 +804,7 @@ export function spawnMeteor(gameState, sounds) {
         if (diff.len() < 30 && !m.exploded) {
             m.exploded = true;
             // Explosion!
-            shake(40);
+            shake(12);
             if (sounds.explode) sounds.explode(50); // Ultimate explosion sound
             
             // Damage AOE
@@ -917,7 +917,7 @@ export function spawnSonicWave(turret, targetEnemy, gameState) {
                         createExplosion(e.pos, gameState.level);
                         destroy(e);
                     }
-                    shake(2);
+                    shake(0.5);
                 }
             });
         });
