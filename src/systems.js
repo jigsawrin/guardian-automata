@@ -50,7 +50,8 @@ export function createSystems(gameState) {
             sounds.warningOut();
             get("girl")[0]?.trigger("start_night");
             gameState.phase = "night";
-            gameState.currentBgm = play("bgm_night", { loop: true, volume: 0.5 });
+            const isBossWave = gameState.currentWave === 8 || gameState.currentWave === 16 || gameState.currentWave === 25;
+            gameState.currentBgm = play(isBossWave ? "bgm_boss" : "bgm_night", { loop: true, volume: 0.5 });
 
             gameState.phaseLabel.text = "WAVE " + gameState.currentWave + ": 拠点を死守せよ";
             gameState.phaseLabel.color = rgb(255, 50, 50);

@@ -69,6 +69,7 @@ function loadGameAssets() {
     // Sounds
     loadSound("bgm_day", "assets/bgm_day.mp3");
     loadSound("bgm_night", "assets/bgm_night.mp3");
+    loadSound("bgm_boss", "assets/bgm_boss.mp3");
     loadSound("bgm_gameover", "assets/bgm_gameover.mp3");
 
     onLoad(() => {
