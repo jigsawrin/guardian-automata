@@ -263,11 +263,26 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         z(120),
         "player",
         {
+            hp: 1,
             speed: 200,
             targetPos: null,
             lastTapTime: 0,
         }
     ]);
+
+    function killPlayer() {
+        if (!player.exists()) return;
+        shake(20);
+        sounds.explode(50);
+        createExplosion(player.pos, 50);
+        destroy(player);
+        wait(1.0, () => {
+            go("gameover", { finalWave: gameState.currentWave });
+        });
+    }
+
+    onCollide("player", "enemy", killPlayer);
+    onCollide("player", "enemyMortar", killPlayer);
 
     // XP Bar
     const xpBarBg = add([
