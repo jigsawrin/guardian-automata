@@ -5,7 +5,7 @@ import { TILE_SIZE, MAP_WIDTH, MAP_HEIGHT } from './constants.js';
 export function dropResource(p, level = 1) {
     console.assert(p && typeof p.x === 'number' && typeof p.y === 'number', "dropResource: p must be a vector (vec2)");
     const r = rand();
-    const type = r < 0.10 ? "battery" : "scrap";
+    const type = r < 0.03 ? "battery" : "scrap";
 
     // Use Number.isFinite for robust position validation
     const isValidPos = p && Number.isFinite(p.x) && Number.isFinite(p.y);
