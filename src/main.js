@@ -711,7 +711,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     // Enemy AI & Pathing
     on("recalc_path", "enemy", (e) => {
-        const path = findPath(grid, vec2(e.pos.x - 20, e.pos.y), vec2(CORE_X, height() / 2 + (e.targetOffset || 0)));
+        const path = findPath(grid, vec2(e.pos.x - 20, e.pos.y), vec2(CORE_X, MAP_HEIGHT / 2 + (e.targetOffset || 0)));
         if (path && path.length > 0) e.path = path;
     });
 
@@ -751,7 +751,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
 
         // 1. Clamp targetPos itself (AI Intent) to stay withinplayable bands
-        targetPos.y = clamp(targetPos.y, 130, height() - 130);
+        targetPos.y = clamp(targetPos.y, 130, MAP_HEIGHT - 130);
 
         let dir = vec2(-1, 0);
         if (!gameState.paused) {
@@ -1034,9 +1034,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                                     rect((isOmega ? 80 : (isCrit ? 18 : 12)) * gameState.upgrades.bulletSizeMod, (isOmega ? 2000 : (isCrit ? 8 : 4)) * gameState.upgrades.bulletSizeMod),
                                     pos(firePos),
                                     color(isOmega ? rgb(0, 255, 255) : bulletColor),
-                                    area({ scale: isOmega ? vec2(1, 1) : vec2(2, 2) }),
+                                    area({ scale: isOmega ? vec2(1, 1) : vec2(2.5, 2.5) }),
                                     rotate(subFinalAngle),
-                                    offscreen({ destroy: true, distance: isOmega ? 2000 : 400 }),
+                                    offscreen({ destroy: true, distance: isOmega ? 2000 : 800 }),
                                     "bullet",
                                     z(95),
                                     lifespan(5), // v3.9.3 fix: Prevent infinite orbits/leaks
@@ -1087,7 +1087,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                                         // Optimization: Only lookup target every few frames or if target missing
                                         b.homingScanTimer = (b.homingScanTimer || 0) - dt();
 
-                                        if (!b.targetEnemy || !b.targetEnemy.exists() || b.targetEnemy.pos.x > width() || b.homingScanTimer <= 0) {
+                                        if (!b.targetEnemy || !b.targetEnemy.exists() || b.targetEnemy.pos.x > MAP_WIDTH || b.homingScanTimer <= 0) {
                                             b.homingScanTimer = 0.1; // Scan 10 times a second
                                             const targets = frameVisibleEnemies;
                                             if (targets.length > 0) {
