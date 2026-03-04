@@ -172,7 +172,9 @@ export function spawnEnemy(gameState, enemiesSpawned) {
                 shieldHP: 0,
                 maxShieldHP: 0,
                 isMega: currentWave >= 16, // Flag for one-hit kill
-                barW: 400
+                barW: 400,
+                invulnTimer: 0, // v3.9.1 fix
+                isGoldShield: false // v3.9.1 fix
             }
         ]);
 

@@ -236,7 +236,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             if (e.invulnTimer > 0) e.invulnTimer -= dt();
         });
         // v3.8.7: Untargetable during I-Frames (Gold Shield)
-        frameVisibleEnemies = frameEnemies.filter(e => e.pos.x <= width() && e.invulnTimer <= 0);
+        // v3.9.1: Use MAP_WIDTH instead of width() to fix mobile targeting, add null check for invulnTimer
+        frameVisibleEnemies = frameEnemies.filter(e => e.pos.x <= MAP_WIDTH && (e.invulnTimer || 0) <= 0);
         frameResources = get("resource");
     });
 
@@ -945,8 +946,12 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 let minDist = effectiveRange;
                 for (const e of enemies) {
                     let d = t.pos.dist(e.pos);
-                    if (e.is("boss")) d = Math.max(0, d - 250);
-                    if (d < minDist) { minDist = d; closest = e; }
+                    // v3.9.1: Account for sprite size in range check (especially for bosses)
+                    const enemySize = (e.width || 80) / 2;
+                    if (d - enemySize < minDist) { 
+                        minDist = d - enemySize; // Target closest based on edge
+                        closest = e; 
+                    }
                 }
 
                 if (closest) {
