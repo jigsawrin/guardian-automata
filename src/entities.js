@@ -225,25 +225,28 @@ export function spawnEnemy(gameState, enemiesSpawned) {
     }
 
     // Check for "First Spawn" forced shield OR random chance
-    let isShielded = (rand() < shieldProb) && currentWave !== 8;
-
+    let isIntroSpawn = false;
     if (!gameState.spawnedEnemyTypes) gameState.spawnedEnemyTypes = [];
     if (!gameState.spawnedEnemyTypes.includes(type)) {
-        if (type !== "normal") isShielded = true;
+        if (type !== "normal") isIntroSpawn = true;
         gameState.spawnedEnemyTypes.push(type);
     }
+
+    let isShielded = (rand() < shieldProb || isIntroSpawn) && currentWave !== 8;
 
     let shieldHP = 0;
     let isGoldShield = false;
     if (isShielded) {
         // v3.8.4: Gold Shield chance (20% total from W22 onwards)
-        // Since shieldProb is 0.5, rand() < 0.4 gives 0.5 * 0.4 = 0.2 (20% total)
-        if (currentWave >= 22 && rand() < 0.4) {
+        if (currentWave >= 22 && rand() < 0.4 && !isIntroSpawn) {
             isGoldShield = true;
             // v3.8.8: Dynamic Gold HP Scaling
             if (currentWave >= 26) shieldHP = 5;
             else if (currentWave >= 24) shieldHP = 3;
             else shieldHP = 2; // W22-23
+        } else if (isIntroSpawn) {
+            // Updated Intro Spawn Shield HP: 1
+            shieldHP = 1;
         } else {
             // Updated Normal Shield HP: 10
             shieldHP = 10;
@@ -861,7 +864,7 @@ export function spawnMeteor(gameState, sounds, applyDamage) {
             // Explosion!
             shake(5);
             if (sounds.explode) sounds.explode(50); // Ultimate explosion sound
-            
+
             // Damage AOE
             const explosionRadius = 350;
             const enemies = get("enemy");
@@ -913,7 +916,7 @@ export function spawnMeteor(gameState, sounds, applyDamage) {
 
 export function spawnSonicWave(turret, targetEnemy, gameState, applyDamage) {
     if (!turret.exists()) return;
-    
+
     const count = gameState.upgrades.sonicWaveLvl || 1;
     const targetPos = targetEnemy ? targetEnemy.pos : turret.pos.add(vec2(500, 0));
     const dir = targetPos.sub(turret.pos).unit();
@@ -956,7 +959,7 @@ export function spawnSonicWave(turret, targetEnemy, gameState, applyDamage) {
         sw.onUpdate(() => {
             if (gameState.paused) return;
             sw.opacity = wave(0.4, 0.8, time() * 10);
-            
+
             // PIERCING COLLISION: Manually check against frame enemies or use onCollide
             // For simplicity and multi-hit prevention, we use a custom check
             const enemies = get("enemy");
