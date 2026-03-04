@@ -769,7 +769,7 @@ export function spawnDecoy(gameState, sounds) {
     return d;
 }
 
-export function spawnMeteor(gameState, sounds) {
+export function spawnMeteor(gameState, sounds, applyDamage) {
     // Target logic: find a random enemy or an area with most enemies
     const targets = get("enemy");
     let targetPos;
@@ -818,17 +818,13 @@ export function spawnMeteor(gameState, sounds) {
             
             // Damage AOE
             const explosionRadius = 350;
-            const enemies = get("enemy");
             enemies.forEach(e => {
                 const dist = e.pos.dist(m.pos);
                 if (dist < explosionRadius) {
                     // Damage falls off with distance but it's very high at center
                     const dmg = map(dist, 0, explosionRadius, 50, 10);
-                    e.hp -= dmg;
-                    if (e.hp <= 0) {
-                        createExplosion(e.pos, gameState.level);
-                        destroy(e);
-                    }
+                    // Pass isHit=true so it breaks shields fairly
+                    if (applyDamage) applyDamage(e, dmg, true);
                 }
             });
 
@@ -868,7 +864,7 @@ export function spawnMeteor(gameState, sounds) {
     });
 }
 
-export function spawnSonicWave(turret, targetEnemy, gameState) {
+export function spawnSonicWave(turret, targetEnemy, gameState, applyDamage) {
     if (!turret.exists()) return;
     
     const count = gameState.upgrades.sonicWaveLvl || 1;
@@ -916,16 +912,11 @@ export function spawnSonicWave(turret, targetEnemy, gameState) {
             
             // PIERCING COLLISION: Manually check against frame enemies or use onCollide
             // For simplicity and multi-hit prevention, we use a custom check
-            const enemies = get("enemy");
             enemies.forEach(e => {
                 if (sw.hitEnemies.has(e.id)) return;
                 if (sw.isColliding(e)) {
                     sw.hitEnemies.add(e.id);
-                    e.hp -= sw.dmg;
-                    if (e.hp <= 0) {
-                        createExplosion(e.pos, gameState.level);
-                        destroy(e);
-                    }
+                    if (applyDamage) applyDamage(e, sw.dmg, true);
                     shake(0.2);
                 }
             });

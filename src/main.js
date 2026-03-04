@@ -905,7 +905,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     const d = t.pos.dist(e.pos);
                     if (d < sonicMinDist) { sonicMinDist = d; sonicTarget = e; }
                 }
-                spawnSonicWave(t, sonicTarget, gameState);
+                spawnSonicWave(t, sonicTarget, gameState, applyDamage);
                 sounds.sonic(); // Use dedicated sonic sound (v3.6.3)
             }
         }
@@ -1146,7 +1146,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     if (sv) destroy(sv);
                     const sl = e.get("shield_label")[0];
                     if (sl) destroy(sl);
-                    sounds.explode(); // Barrier break sound
+                    sounds.warningOut(); // v3.8.5: Distinct barrier break sound
                 } else {
                     if (sounds.hit) sounds.hit(); // Standard hit sound
                 }
@@ -1412,7 +1412,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             gameState.meteorTimer -= dt();
             if (gameState.meteorTimer <= 0) {
                 gameState.meteorTimer = 18; // 18 seconds interval
-                spawnMeteor(gameState, sounds);
+                spawnMeteor(gameState, sounds, applyDamage);
             }
         }
     });
