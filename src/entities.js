@@ -206,14 +206,15 @@ export function spawnEnemy(gameState, enemiesSpawned) {
     // Speed: base + wave * scaling (Aggressive)
     // HP: base + floor(wave / 3)
     const hpBoost = Math.floor(currentWave / 3);
+    const hpMult = currentWave >= 22 ? (2.0 + (currentWave - 22) * 0.2) : 1.0;
     const speedMult = currentWave >= 22 ? 1.5 : 1.0;
     const specs = {
-        heavy: { w: 120, h: 120, col: rgb(150, 150, 255), speed: (30 + currentWave * 4) * speedMult, hp: 3 + hpBoost, areaScale: 0.2, barW: 40, barY: -60, sprite: "enemy" },
-        ranged: { w: 70, h: 70, col: rgb(0, 255, 255), speed: (50 + currentWave * 3) * speedMult, hp: 2 + hpBoost, areaScale: 0.2, barW: 20, barY: -40, sprite: "enemy" },
-        warp: { w: 80, h: 80, col: rgb(255, 255, 255), speed: (20 + currentWave * 2) * speedMult, hp: 1 + hpBoost, areaScale: 0.2, barW: 25, barY: -50, sprite: "enemy_warp" },
-        assassin: { w: 80, h: 80, col: rgb(255, 100, 100), speed: (40 + currentWave * 3) * speedMult, hp: 1 + hpBoost, areaScale: 0.2, barW: 25, barY: -50, sprite: "enemy_assassin" },
-        jammer: { w: 100, h: 100, col: rgb(255, 255, 200), speed: (30 + currentWave * 2) * speedMult, hp: 2 + hpBoost, areaScale: 0.2, barW: 35, barY: -55, sprite: "enemy_jammer" },
-        normal: { w: 90, h: 90, col: rgb(255, 180, 180), speed: (45 + currentWave * 5) * speedMult, hp: 1 + hpBoost, areaScale: 0.2, barW: 30, barY: -45, sprite: "enemy" }
+        heavy: { w: 120, h: 120, col: rgb(150, 150, 255), speed: (30 + currentWave * 4) * speedMult, hp: Math.floor((3 + hpBoost) * hpMult), areaScale: 0.2, barW: 40, barY: -60, sprite: "enemy" },
+        ranged: { w: 70, h: 70, col: rgb(0, 255, 255), speed: (50 + currentWave * 3) * speedMult, hp: Math.floor((2 + hpBoost) * hpMult), areaScale: 0.2, barW: 20, barY: -40, sprite: "enemy" },
+        warp: { w: 80, h: 80, col: rgb(255, 255, 255), speed: (20 + currentWave * 2) * speedMult, hp: Math.floor((1 + hpBoost) * hpMult), areaScale: 0.2, barW: 25, barY: -50, sprite: "enemy_warp" },
+        assassin: { w: 80, h: 80, col: rgb(255, 100, 100), speed: (40 + currentWave * 3) * speedMult, hp: Math.floor((1 + hpBoost) * hpMult), areaScale: 0.2, barW: 25, barY: -50, sprite: "enemy_assassin" },
+        jammer: { w: 100, h: 100, col: rgb(255, 255, 200), speed: (30 + currentWave * 2) * speedMult, hp: Math.floor((2 + hpBoost) * hpMult), areaScale: 0.2, barW: 35, barY: -55, sprite: "enemy_jammer" },
+        normal: { w: 90, h: 90, col: rgb(255, 180, 180), speed: (45 + currentWave * 5) * speedMult, hp: Math.floor((1 + hpBoost) * hpMult), areaScale: 0.2, barW: 30, barY: -45, sprite: "enemy" }
     };
 
     const s = specs[type];
