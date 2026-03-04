@@ -141,6 +141,7 @@ function getInitialGameState() {
         paused: false,
         jammingTimer: 0,
         spawnedEnemyTypes: [],
+        victoryPending: false, // v4.1.0: Prevent wave clear banner during victory
     };
 }
 
@@ -423,7 +424,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (gameState.phase === "day" && !gameState.paused) {
             gameState.dayTimer -= delta;
             if (gameState.dayTimer <= 0) systems.startNight();
-        } else if (gameState.phase === "night" && gameState.enemiesSpawned >= gameState.enemiesInWave && get("enemy").length === 0) {
+        } else if (gameState.phase === "night" && gameState.enemiesSpawned >= gameState.enemiesInWave && get("enemy").length === 0 && !gameState.victoryPending) {
             gameState.phase = "transition";
             console.log("Wave " + gameState.currentWave + " cleared. Transitioning...");
             if (gameState.currentBgm) gameState.currentBgm.stop();
@@ -1217,6 +1218,11 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 
                 // v4.0.0: Trigger Victory Sequence after W25 Boss death
                 if (isBoss25) {
+                    gameState.victoryPending = true; // v4.1.0: Block normal wave clear
+                    if (gameState.currentBgm) {
+                        gameState.currentBgm.stop();
+                        gameState.currentBgm = null;
+                    }
                     wait(1, () => showVictorySequence());
                 }
             } else {
@@ -1448,16 +1454,16 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             gameState.currentBgm = null;
         }
 
-        // Dark Overlay
+        // Dark Overlay: higher Z to cover EVERYTHING (HUD:1100, Banner:5000)
         const overlay = add([
             rect(width(), height()),
             color(0, 0, 0),
             opacity(0),
-            z(900),
+            z(6000), 
             fixed(),
             "victory_ui"
         ]);
-        tween(0, 0.8, 1.5, (v) => overlay.opacity = v);
+        tween(0, 0.9, 1.5, (v) => overlay.opacity = v);
 
         // Fireworks Controller
         const fwTimer = loop(0.4, () => {
@@ -1465,10 +1471,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             const y = rand(100, height() - 200);
             const col = choose([rgb(255, 100, 100), rgb(100, 255, 100), rgb(100, 100, 255), rgb(255, 255, 100)]);
             
-            // "Launch" flash
             createExplosion(vec2(x, y), 5);
             
-            // Sparkles
             for (let i = 0; i < 20; i++) {
                 const angle = rand(0, 360);
                 const dist = rand(20, 100);
@@ -1477,7 +1481,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     rect(4, 4),
                     color(col),
                     opacity(1),
-                    z(910),
+                    z(6100),
                     fixed(),
                     "victory_ui",
                     { dir: vec2(Math.cos(angle * Math.PI / 180), Math.sin(angle * Math.PI / 180)), speed: rand(50, 150) }
@@ -1491,36 +1495,40 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             sounds.explode(3);
         });
 
-        // Text
+        // Text: Mobile responsive sizes
+        const titleSize = isMobile ? 24 : 32;
+        const bodySize = isMobile ? 16 : 20;
+        const tapSize = isMobile ? 18 : 24;
+
         const vText = add([
-            text("MISSION ACCOMPLISHED\nガーディアン計画・第一段階完了", { size: 32, align: "center", width: width() - 100 }),
+            text("MISSION ACCOMPLISHED\nガーディアン計画・第一段階完了", { size: titleSize, align: "center", width: width() - 40 }),
             pos(width() / 2, height() / 3),
             anchor("center"),
             color(255, 255, 100),
             opacity(0),
-            z(920),
+            z(6200),
             fixed(),
             "victory_ui"
         ]);
 
         const eText = add([
-            text("これまでの防衛に最大級の感謝を。\nここからは未踏の領域「エンドレスモード」です。\nどこまで進行できるか、限界に挑戦してください。", { size: 20, align: "center", width: width() - 60, lineSpacing: 10 }),
-            pos(width() / 2, height() / 2 + 50),
+            text("これまでの防衛に最大級の感謝を。\nここからは未踏の領域「エンドレスモード」です。\nどこまで進行できるか、限界に挑戦してください。", { size: bodySize, align: "center", width: width() - 40, lineSpacing: 10 }),
+            pos(width() / 2, height() / 2 + (isMobile ? 30 : 50)),
             anchor("center"),
             color(200, 255, 255),
             opacity(0),
-            z(920),
+            z(6200),
             fixed(),
             "victory_ui"
         ]);
 
         const nextText = add([
-            text("Tap or Press Space to Continue", { size: 24 }),
-            pos(width() / 2, height() - 100),
+            text("Tap or Press Space to Continue", { size: tapSize }),
+            pos(width() / 2, height() - (isMobile ? 120 : 180)),
             anchor("center"),
             color(255, 255, 255),
             opacity(0),
-            z(920),
+            z(6200),
             fixed(),
             "victory_ui"
         ]);
@@ -1533,7 +1541,11 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             const proceed = () => {
                 cleanup();
                 gameState.paused = false;
-                systems.startDay(); // Start Wave 26
+                gameState.victoryPending = false; // Reset flag
+                gameState.currentWave++; // Advance to 26
+                updateHighScore(gameState.currentWave);
+                gameState.enemiesSpawned = 0;
+                systems.startDay(); 
             };
 
             const cleanup = () => {
