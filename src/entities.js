@@ -138,7 +138,7 @@ export function spawnEnemy(gameState, enemiesSpawned) {
                 sprite: "enemy", // Heavy look
                 size: 650,
                 color: rgb(100, 100, 255),
-                hp: 500, // Buffed from 120 (v3.9.2)
+                hp: 800, // Buffed from 500 (v3.9.5)
                 speed: 12,
                 tag: "boss_16"
             };
@@ -147,7 +147,7 @@ export function spawnEnemy(gameState, enemiesSpawned) {
                 sprite: "enemy_assassin",
                 size: 800,
                 color: rgb(255, 50, 50),
-                hp: 1000, // Buffed from 350 (v3.9.2)
+                hp: 2000, // Buffed from 1000 (v3.9.5)
                 speed: 10,
                 tag: "boss_25"
             };
