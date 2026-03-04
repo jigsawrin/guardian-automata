@@ -219,9 +219,11 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     // Performance Optimization: Cache entities globally for the current frame
     let frameEnemies = [];
+    let frameVisibleEnemies = [];
     let frameResources = [];
     onUpdate(() => {
         frameEnemies = get("enemy");
+        frameVisibleEnemies = frameEnemies.filter(e => e.pos.x <= width());
         frameResources = get("resource");
     });
 
@@ -912,7 +914,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         const effectiveDmg = t.dmg * gameState.upgrades.turretDmgMod;
 
         if (t.timer >= effectiveFireRate) {
-            const enemies = frameEnemies; // Performance Optimization: use cached enemies
+            const enemies = frameVisibleEnemies; 
             if (enemies.length > 0) {
                 let closest = null;
                 let minDist = effectiveRange;
@@ -1034,9 +1036,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                                     // Optimization: Only lookup target every few frames or if target missing
                                     b.homingScanTimer = (b.homingScanTimer || 0) - dt();
 
-                                    if (!b.targetEnemy || !b.targetEnemy.exists() || b.homingScanTimer <= 0) {
+                                    if (!b.targetEnemy || !b.targetEnemy.exists() || b.targetEnemy.pos.x > width() || b.homingScanTimer <= 0) {
                                         b.homingScanTimer = 0.1; // Scan 10 times a second
-                                        const targets = frameEnemies;
+                                        const targets = frameVisibleEnemies;
                                         if (targets.length > 0) {
                                             let targetClosest = null;
                                             let targetMinDist = 700;
@@ -1120,6 +1122,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     // Helper function to apply damage to an enemy, considering shields and handling death
     const applyDamage = (e, dmg, isHit = true) => {
         if (!e || !e.exists() || e.hp <= 0 || isNaN(dmg)) return;
+        
+        // v3.7.9: Spawn Protection - Enemies off-screen are invincible
+        if (e.is("enemy") && e.pos.x > width()) return;
 
         // Handle Shield (Barrier) Logic
         if (e.shieldHP > 0) {
