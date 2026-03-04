@@ -330,7 +330,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     const hudLevel = add([
         text("LEVEL 1", { size: isMobile ? 18 : 20, font: "monospace" }),
-        pos(isMobile ? 10 : 20, isMobile ? 15 : 68),
+        pos(isMobile ? 10 : 20, isMobile ? 55 : 68),
         anchor("left"),
         fixed(),
         z(1100),
@@ -350,8 +350,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     ]);
 
     gameState.phaseIndicator = add([
-        text("1日目：昼", { size: isMobile ? 22 : 32, font: "monospace" }),
-        pos(width() / 2, isMobile ? 15 : 40),
+        text("1日目：昼", { size: isMobile ? 30 : 32, font: "monospace" }),
+        pos(width() / 2, isMobile ? 50 : 40),
         anchor("center"),
         fixed(),
         z(1100),
@@ -361,7 +361,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     const dayTimerLabel = add([
         text("", { size: isMobile ? 18 : 24, font: "monospace" }),
-        pos(isMobile ? width() - 10 : width() - 20, isMobile ? 15 : 95),
+        pos(isMobile ? width() - 10 : width() - 20, isMobile ? 55 : 95),
         anchor("right"),
         fixed(),
         z(1100),
