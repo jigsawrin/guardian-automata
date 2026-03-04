@@ -183,10 +183,10 @@ export function spawnEnemy(gameState, enemiesSpawned) {
     else if (r < rangedProb + warpProb + assassinProb + (currentWave >= 7 ? 0.1 : 0) + heavyProb) type = "heavy";
     else type = "normal";
 
-    // Shielded enemies: Randomly from Wave 6 onwards, increased to 40% chance
+    // Shielded enemies: Randomly from Wave 6 onwards, increased to 50% chance
     let shieldProb = 0;
     if (currentWave >= 6) {
-        shieldProb = 0.4;
+        shieldProb = 0.5;
     }
 
     // Check for "First Spawn" forced shield OR random chance
@@ -201,10 +201,11 @@ export function spawnEnemy(gameState, enemiesSpawned) {
     let shieldHP = 0;
     let isGoldShield = false;
     if (isShielded) {
-        // v3.8.3: Gold Shield chance (20% total from W22 onwards)
-        if (currentWave >= 22 && rand() < 0.5) {
+        // v3.8.4: Gold Shield chance (20% total from W22 onwards)
+        // Since shieldProb is 0.5, rand() < 0.4 gives 0.5 * 0.4 = 0.2 (20% total)
+        if (currentWave >= 22 && rand() < 0.4) {
             isGoldShield = true;
-            shieldHP = 1;
+            shieldHP = 5; // Increased from 1 to 5
         } else {
             // Updated Normal Shield HP: 10
             shieldHP = 10;
