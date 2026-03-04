@@ -842,7 +842,7 @@ export function spawnMeteor(gameState, sounds) {
         } else {
             m.move(diff.unit().scale(m.speed));
             // Add particles
-            add([
+            const p = add([
                 circle(rand(5, 15)),
                 pos(m.pos.add(vec2(rand(-20, 20), rand(-20, 20)))),
                 color(255, rand(50, 150), 0),
@@ -850,7 +850,8 @@ export function spawnMeteor(gameState, sounds) {
                 move(diff.unit().scale(-0.5), 100),
                 z(149),
                 "particle"
-            ]).onUpdate((p) => {
+            ]);
+            p.onUpdate(() => {
                 p.opacity -= dt() * 3;
                 if (p.opacity <= 0) destroy(p);
             });
