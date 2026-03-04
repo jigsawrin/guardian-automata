@@ -860,7 +860,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         // Enemy effects
         createExplosion(e.pos, gameState.level);
         sounds.explode(gameState.level);
-        destroy(e);
+        // v3.9.7: Decoys only deal 1 damage to bosses as requested
+        const enemyDmg = e.is("boss") ? 1 : 15; 
+        applyDamage(e, enemyDmg, true); 
         
         if (d.hp <= 0) {
             createExplosion(d.pos, gameState.level);
@@ -904,6 +906,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             sounds.explode(gameState.level);
             destroy(d);
         }
+        applyDamage(e, 1, true); // v3.9.6 fix
     });
 
     onUpdate("turret", (t) => {
