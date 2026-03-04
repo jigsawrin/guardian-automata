@@ -818,6 +818,7 @@ export function spawnMeteor(gameState, sounds, applyDamage) {
             
             // Damage AOE
             const explosionRadius = 350;
+            const enemies = get("enemy");
             enemies.forEach(e => {
                 const dist = e.pos.dist(m.pos);
                 if (dist < explosionRadius) {
@@ -912,6 +913,7 @@ export function spawnSonicWave(turret, targetEnemy, gameState, applyDamage) {
             
             // PIERCING COLLISION: Manually check against frame enemies or use onCollide
             // For simplicity and multi-hit prevention, we use a custom check
+            const enemies = get("enemy");
             enemies.forEach(e => {
                 if (sw.hitEnemies.has(e.id)) return;
                 if (sw.isColliding(e)) {
