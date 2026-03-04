@@ -445,7 +445,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
                 // Turret UI Icon
                 drawCircle({
-                    pos: vec2(uiX - 100, uiY),
+                    pos: vec2(uiX - 120, uiY),
                     radius: 25,
                     color: rgb(40, 40, 60),
                     outline: { color: rgb(100, 100, 200), width: 2 },
@@ -466,7 +466,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     if (pts.length > 2) {
                         try {
                             drawPoly({
-                                pos: vec2(uiX - 100, uiY),
+                                pos: vec2(uiX - 120, uiY),
                                 pts: pts,
                                 color: rgb(0, 255, 255),
                                 opacity: 0.6,
@@ -474,7 +474,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                             });
                         } catch (e) {
                             drawCircle({
-                                pos: vec2(uiX - 100, uiY),
+                                pos: vec2(uiX - 120, uiY),
                                 radius: 25 * p,
                                 color: rgb(0, 255, 255),
                                 opacity: 0.4,
@@ -484,7 +484,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     }
                 } else {
                     drawCircle({
-                        pos: vec2(uiX - 100, uiY),
+                        pos: vec2(uiX - 120, uiY),
                         radius: 25,
                         color: rgb(0, 255, 255),
                         opacity: 0.3,
@@ -494,7 +494,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
                 drawSprite({
                     sprite: getTurretSprite(gameState.level),
-                    pos: vec2(uiX - 100, uiY),
+                    pos: vec2(uiX - 120, uiY),
                     width: 40,
                     height: 40,
                     anchor: "center",
@@ -505,7 +505,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 drawText({
                     text: "W",
                     size: 16,
-                    pos: vec2(uiX - 100, uiY + 32),
+                    pos: vec2(uiX - 120, uiY + 32),
                     anchor: "center",
                     font: "monospace",
                     color: rgb(255, 255, 255),
@@ -516,7 +516,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 drawText({
                     text: `${activeCount} / ${gameState.upgrades.maxTurrets}`,
                     size: 24,
-                    pos: vec2(uiX - 60, uiY),
+                    pos: vec2(uiX - 80, uiY),
                     anchor: "left",
                     font: "monospace",
                     color: activeCount >= gameState.upgrades.maxTurrets ? rgb(255, 50, 50) : rgb(255, 255, 255),
@@ -525,13 +525,15 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
                 // Enemy Counter (Remaining / Total)
                 if (gameState.phase === "night" || gameState.phase === "transition") {
-                    const remainingEnemies = (gameState.enemiesInWave - gameState.enemiesSpawned) + frameEnemies.filter(e => e.exists()).length;
+                    // Use get("enemy").length directly to avoid flickers
+                    const activeEnemyCount = get("enemy").length;
+                    const remainingEnemies = (gameState.enemiesInWave - gameState.enemiesSpawned) + activeEnemyCount;
 
                     drawSprite({
                         sprite: "enemy",
-                        pos: vec2(uiX + 60, uiY),
-                        width: 40,
-                        height: 40,
+                        pos: vec2(uiX + 20, uiY),
+                        width: 60,
+                        height: 60,
                         anchor: "center",
                         fixed: true
                     });
@@ -539,7 +541,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                     drawText({
                         text: `: ${remainingEnemies} / ${gameState.enemiesInWave}`,
                         size: 24,
-                        pos: vec2(uiX + 100, uiY),
+                        pos: vec2(uiX + 65, uiY),
                         anchor: "left",
                         font: "monospace",
                         color: rgb(255, 200, 0),
