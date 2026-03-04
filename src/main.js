@@ -143,6 +143,7 @@ function getInitialGameState() {
         jammingTimer: 0,
         spawnedEnemyTypes: [],
         victoryPending: false, // v4.1.0: Prevent wave clear banner during victory
+        gameOverPending: false, // v5.1.8
     };
 }
 
@@ -841,16 +842,20 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
 
         // Core Deadline Check
-        if (e.pos.x < CORE_X + 90) {
+        // v5.1.9: Use enemy width for boss to prevent "peneration" depth issue
+        const triggerX = e.is("boss") ? (CORE_X + 60 + (e.width || 0) / 2) : (CORE_X + 90);
+
+        if (e.pos.x < triggerX) {
             if (e.isMega) {
                 // v3.8.9: Mega Boss One-Hit Game Over
                 if (girl.exists() && !gameState.gameOverPending) {
                     gameState.gameOverPending = true;
+                    girl.hp = 0; // Absolute defeat, no victory possible
+                    girlHpFill.width = 0;
                     shake(50);
                     sounds.explode(100);
                     createExplosion(girl.pos, 200);
                     destroy(girl);
-                    girl.hp = 0; // Ensure HP is 0 for victory checks
                     // Force game over after dramatic pause
                     wait(1.5, () => {
                         go("gameover", { finalWave: gameState.currentWave });

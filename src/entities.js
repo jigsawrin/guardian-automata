@@ -170,7 +170,7 @@ export function spawnEnemy(gameState, enemiesSpawned) {
                 stepTimer: 0,
                 shieldHP: 0,
                 maxShieldHP: 0,
-                isMega: currentWave >= 16, // Flag for one-hit kill
+                isMega: currentWave === 8 || currentWave === 16 || currentWave === 25, // Flag for one-hit kill
                 barW: 400,
                 invulnTimer: 0, // v3.9.1 fix
                 isGoldShield: false // v3.9.1 fix
