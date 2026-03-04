@@ -192,21 +192,6 @@ export function createExplosion(p, level = 1) {
         }
     }
 
-    // Level 50 Super Flash
-    if (level >= 50) {
-        const superFlash = add([
-            rect(width(), height()),
-            pos(0, 0),
-            color(255, 255, 255),
-            opacity(0.2),
-            fixed(),
-            z(1000)
-        ]);
-        superFlash.onUpdate(() => {
-            superFlash.opacity -= dt() * 4;
-            if (superFlash.opacity <= 0) destroy(superFlash);
-        });
-    }
 
     expl.onUpdate(() => {
         expl.opacity -= dt() * 3;
