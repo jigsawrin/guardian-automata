@@ -799,7 +799,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
                         // 2. Dampen forces that push OUT of bounds
                         if (ey < 140 && forceY < 0) forceY *= 0.1;
-                        if (ey > height() - 140 && forceY > 0) forceY *= 0.1;
+                        if (ey > MAP_HEIGHT - 140 && forceY > 0) forceY *= 0.1;
 
                         sepX += forceX;
                         sepY += forceY;
@@ -836,7 +836,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             }
 
             // 4. Final Position Clamp (Safety net)
-            e.pos.y = clamp(e.pos.y, 120, height() - 120);
+            e.pos.y = clamp(e.pos.y, 120, MAP_HEIGHT - 120);
         }
 
         // Core Deadline Check
@@ -1180,7 +1180,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (e.invulnTimer > 0) return;
 
         // v3.7.9: Spawn Protection - Enemies off-screen are invincible
-        if (e.is("enemy") && e.pos.x > width()) return;
+        if (e.is("enemy") && e.pos.x > MAP_WIDTH) return;
 
         // Handle Shield (Barrier) Logic
         if (e.shieldHP > 0) {
