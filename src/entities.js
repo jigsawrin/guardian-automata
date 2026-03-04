@@ -123,37 +123,71 @@ export function spawnEnemy(gameState, enemiesSpawned) {
     const spawnPos = vec2(MAP_WIDTH + 100, rand(128, MAP_HEIGHT - 128));
     let type = "normal";
 
-    if (currentWave === 8) {
+    if (currentWave === 8 || currentWave === 16 || currentWave === 25) {
+        let bossConfig = {
+            sprite: "enemy",
+            size: 500,
+            color: rgb(255, 80, 80),
+            hp: 30, // Buffed slightly from 25
+            speed: 15,
+            tag: "boss_8"
+        };
+
+        if (currentWave === 16) {
+            bossConfig = {
+                sprite: "enemy", // Heavy look
+                size: 650,
+                color: rgb(100, 100, 255),
+                hp: 120,
+                speed: 12,
+                tag: "boss_16"
+            };
+        } else if (currentWave === 25) {
+            bossConfig = {
+                sprite: "enemy_assassin",
+                size: 800,
+                color: rgb(255, 50, 50),
+                hp: 350,
+                speed: 10,
+                tag: "boss_25"
+            };
+        }
+
         const e = add([
-            sprite("enemy", { width: 500, height: 500 }),
-            color(255, 80, 80),
+            sprite(bossConfig.sprite, { width: bossConfig.size, height: bossConfig.size }),
+            color(bossConfig.color),
             pos(MAP_WIDTH + 400, MAP_HEIGHT / 2),
             area(),
             anchor("center"),
             "enemy",
             "boss",
+            bossConfig.tag,
             z(80),
             {
-                speed: 15,
-                hp: 25,
-                maxHp: 25,
+                speed: bossConfig.speed,
+                hp: bossConfig.hp,
+                maxHp: bossConfig.hp,
                 targetOffset: 0,
                 stepTimer: 0,
                 shieldHP: 0,
-                maxShieldHP: 0
+                maxShieldHP: 0,
+                isMega: currentWave >= 16, // Flag for one-hit kill
+                barW: 400
             }
         ]);
+
+        const barWidth = 400;
         e.add([
-            rect(300, 15),
-            pos(0, -280),
+            rect(barWidth, 20),
+            pos(0, -(bossConfig.size / 2 + 30)),
             color(30, 30, 30),
-            outline(3),
+            outline(4),
             anchor("center"),
             z(110),
         ]);
         e.add([
-            rect(300, 15),
-            pos(-150, -280),
+            rect(barWidth, 20),
+            pos(-barWidth / 2, -(bossConfig.size / 2 + 30)),
             color(255, 50, 50),
             anchor("left"),
             z(110),

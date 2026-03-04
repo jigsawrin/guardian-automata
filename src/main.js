@@ -819,19 +819,31 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             e.pos.y = clamp(e.pos.y, 120, height() - 120);
         }
 
-        const engX = e.is("boss") ? (e.pos.x - 250) : e.pos.x;
-        if (engX <= ENGAGEMENT_X) {
-            if (e.is("boss")) girl.hp = 0; else girl.hp -= 15;
+        // Core Deadline Check
+        if (e.pos.x < CORE_X + 60) {
+            if (e.isMega) {
+                // v3.8.9: Mega Boss One-Hit Game Over
+                if (girl.exists()) {
+                    shake(50);
+                    sounds.explode(100);
+                    createExplosion(girl.pos, 200);
+                    destroy(girl);
+                    // Force game over after dramatic pause
+                    wait(1.5, () => {
+                        go("gameover", { finalWave: gameState.currentWave });
+                    });
+                }
+                destroy(e);
+                return;
+            }
+
+            sounds.hit();
+            shake(2);
+            girl.hp -= 5;
             girlHpFill.width = Math.max(0, (girl.hp / girl.maxHp) * 100);
             if (girl.hp <= 0) {
-                shake(20);
                 go("gameover", { finalWave: gameState.currentWave });
-            } else {
-                shake(1);
             }
-            sounds.damage(); 
-            createExplosion(e.pos, gameState.level); 
-            sounds.explode(gameState.level); 
             destroy(e);
         }
     });
@@ -1261,7 +1273,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (!e || !e.exists()) return;
         const hpbar = e.get("hpbar")[0];
         if (hpbar) {
-            let fw = e.is("boss") ? 300 : (e.barW || 30);
+            // v3.8.9: Use e.barW if available, fallback for bosses
+            let fw = e.barW || (e.is("boss") ? 300 : 30);
             hpbar.width = Math.max(0, (e.hp / e.maxHp) * fw);
         }
     };
