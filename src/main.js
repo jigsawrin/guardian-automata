@@ -19,8 +19,8 @@ kaboom({
     width: viewWidth,
     height: viewHeight,
     letterbox: true,
-    texFilter: "nearest",
-    pixelDensity: Math.min(window.devicePixelRatio, 2), // Limit to 2x for performance
+    texFilter: "linear",
+    pixelDensity: window.devicePixelRatio,
 });
 
 // --- CRITICAL ASSETS (Loaded upfront) ---
