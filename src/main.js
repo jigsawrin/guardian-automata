@@ -1019,6 +1019,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                                 offscreen({ destroy: true, distance: isOmega ? 2000 : 400 }),
                                 "bullet",
                                 z(95),
+                                lifespan(5), // v3.9.3 fix: Prevent infinite orbits/leaks
                                 {
                                     dmg: isOmega ? 10 : bulletDmg,
                                     isCrit: isCrit,
@@ -1119,7 +1120,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                                                 b.dir = vec2(newDirX / newDist, newDirY / newDist);
                                                 b.angle = b.dir.angle();
                                             }
-                                            if (dist < 20) b.dir = vec2(targetDirX, targetDirY); // Snap
+                                            // v3.9.3: Snap to target when closing in, especially for large bosses
+                                            const snapDist = targetClosest.is("boss") ? (targetClosest.width / 4) : 20;
+                                            if (dist < snapDist) b.dir = vec2(targetDirX, targetDirY); 
                                         }
                                     }
                                 }
