@@ -871,7 +871,7 @@ export function spawnSonicWave(turret, targetEnemy, gameState) {
         const sideDir = vec2(-dir.y, dir.x).scale(offset);
         const spawnPos = turret.pos.add(sideDir);
 
-        const wave = add([
+        const sw = add([
             // Using a stylized ')' for the crescent shape
             text(")", { size: 100, font: "monospace" }),
             pos(spawnPos),
@@ -892,7 +892,7 @@ export function spawnSonicWave(turret, targetEnemy, gameState) {
         ]);
 
         // Add glow
-        wave.add([
+        sw.add([
             text(")", { size: 110, font: "monospace" }),
             anchor("center"),
             color(255, 255, 255),
@@ -900,18 +900,18 @@ export function spawnSonicWave(turret, targetEnemy, gameState) {
             z(-1)
         ]);
 
-        wave.onUpdate(() => {
+        sw.onUpdate(() => {
             if (gameState.paused) return;
-            wave.opacity = wave(0.4, 0.8, time() * 10);
+            sw.opacity = wave(0.4, 0.8, time() * 10);
             
             // PIERCING COLLISION: Manually check against frame enemies or use onCollide
             // For simplicity and multi-hit prevention, we use a custom check
             const enemies = get("enemy");
             enemies.forEach(e => {
-                if (wave.hitEnemies.has(e.id)) return;
-                if (wave.isColliding(e)) {
-                    wave.hitEnemies.add(e.id);
-                    e.hp -= wave.dmg;
+                if (sw.hitEnemies.has(e.id)) return;
+                if (sw.isColliding(e)) {
+                    sw.hitEnemies.add(e.id);
+                    e.hp -= sw.dmg;
                     if (e.hp <= 0) {
                         createExplosion(e.pos, gameState.level);
                         destroy(e);
