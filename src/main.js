@@ -1206,6 +1206,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         updateEnemyHpBar(e);
 
         if (e.hp <= 0 && e.exists()) {
+            const isBoss25 = e.is("boss_25");
             const diePos = vec2(e.pos.x, e.pos.y);
             // Final sanity check for death position
             if (Number.isFinite(diePos.x) && Number.isFinite(diePos.y)) {
@@ -1213,6 +1214,11 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 createExplosion(diePos, gameState.level);
                 sounds.explode(gameState.level);
                 dropResource(diePos, gameState.level);
+                
+                // v4.0.0: Trigger Victory Sequence after W25 Boss death
+                if (isBoss25) {
+                    wait(1, () => showVictorySequence());
+                }
             } else {
                 destroy(e);
             }
@@ -1432,6 +1438,111 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
                 if (girl.hp <= 0) gameOver();
             }
+        });
+    function showVictorySequence() {
+        gameState.paused = true;
+        if (gameState.currentBgm) {
+            gameState.currentBgm.stop();
+            gameState.currentBgm = null;
+        }
+
+        // Dark Overlay
+        const overlay = add([
+            rect(width(), height()),
+            color(0, 0, 0),
+            opacity(0),
+            z(900),
+            fixed(),
+            "victory_ui"
+        ]);
+        tween(0, 0.8, 1.5, (v) => overlay.opacity = v);
+
+        // Fireworks Controller
+        const fwTimer = loop(0.4, () => {
+            const x = rand(100, width() - 100);
+            const y = rand(100, height() - 200);
+            const col = choose([rgb(255, 100, 100), rgb(100, 255, 100), rgb(100, 100, 255), rgb(255, 255, 100)]);
+            
+            // "Launch" flash
+            createExplosion(vec2(x, y), 5);
+            
+            // Sparkles
+            for (let i = 0; i < 20; i++) {
+                const angle = rand(0, 360);
+                const dist = rand(20, 100);
+                const p = add([
+                    pos(x, y),
+                    rect(4, 4),
+                    color(col),
+                    opacity(1),
+                    z(910),
+                    fixed(),
+                    "victory_ui",
+                    { dir: vec2(Math.cos(angle * Math.PI / 180), Math.sin(angle * Math.PI / 180)), speed: rand(50, 150) }
+                ]);
+                p.onUpdate(() => {
+                    p.move(p.dir.scale(p.speed));
+                    p.opacity -= dt();
+                    if (p.opacity <= 0) destroy(p);
+                });
+            }
+            sounds.explode(3);
+        });
+
+        // Text
+        const vText = add([
+            text("MISSION ACCOMPLISHED\nガーディアン計画・第一段階完了", { size: 32, align: "center", width: width() - 100 }),
+            pos(width() / 2, height() / 3),
+            anchor("center"),
+            color(255, 255, 100),
+            opacity(0),
+            z(920),
+            fixed(),
+            "victory_ui"
+        ]);
+
+        const eText = add([
+            text("これまでの防衛に最大級の感謝を。\nここからは未踏の領域「エンドレスモード」です。\nどこまで進行できるか、限界に挑戦してください。", { size: 20, align: "center", width: width() - 60, lineSpacing: 10 }),
+            pos(width() / 2, height() / 2 + 50),
+            anchor("center"),
+            color(200, 255, 255),
+            opacity(0),
+            z(920),
+            fixed(),
+            "victory_ui"
+        ]);
+
+        const nextText = add([
+            text("Tap or Press Space to Continue", { size: 24 }),
+            pos(width() / 2, height() - 100),
+            anchor("center"),
+            color(255, 255, 255),
+            opacity(0),
+            z(920),
+            fixed(),
+            "victory_ui"
+        ]);
+
+        tween(0, 1, 1, (v) => vText.opacity = v);
+        wait(1.5, () => tween(0, 1, 1, (v) => eText.opacity = v));
+        wait(3, () => {
+            tween(0, 1, 0.5, (v) => nextText.opacity = v);
+            
+            const proceed = () => {
+                cleanup();
+                gameState.paused = false;
+                systems.startDay(); // Start Wave 26
+            };
+
+            const cleanup = () => {
+                fwTimer.cancel();
+                get("victory_ui").forEach(destroy);
+                removeEventListener("keypress", spaceHandler);
+                removeEventListener("click", clickHandler);
+            };
+
+            const spaceHandler = onKeyPress("space", proceed);
+            const clickHandler = onClick(proceed);
         });
     }
 
