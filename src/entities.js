@@ -156,8 +156,8 @@ export function spawnEnemy(gameState, enemiesSpawned) {
         const e = add([
             sprite(bossConfig.sprite, { width: bossConfig.size, height: bossConfig.size }),
             color(bossConfig.color),
-            pos(MAP_WIDTH + 400, MAP_HEIGHT / 2),
-            area(),
+            pos(MAP_WIDTH + 150, MAP_HEIGHT / 2),
+            area({ scale: 0.8 }), // Scaled area for giant boss
             anchor("center"),
             "enemy",
             "boss",
