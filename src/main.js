@@ -526,10 +526,20 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 // Enemy Counter (Remaining / Total)
                 if (gameState.phase === "night" || gameState.phase === "transition") {
                     const remainingEnemies = (gameState.enemiesInWave - gameState.enemiesSpawned) + frameEnemies.filter(e => e.exists()).length;
-                    drawText({
-                        text: `敵: ${remainingEnemies} / ${gameState.enemiesInWave}`,
-                        size: 20,
+
+                    drawSprite({
+                        sprite: "enemy",
                         pos: vec2(uiX + 60, uiY),
+                        width: 40,
+                        height: 40,
+                        anchor: "center",
+                        fixed: true
+                    });
+
+                    drawText({
+                        text: `: ${remainingEnemies} / ${gameState.enemiesInWave}`,
+                        size: 24,
+                        pos: vec2(uiX + 100, uiY),
                         anchor: "left",
                         font: "monospace",
                         color: rgb(255, 200, 0),
