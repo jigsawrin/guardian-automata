@@ -231,7 +231,12 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     let frameResources = [];
     onUpdate(() => {
         frameEnemies = get("enemy");
-        frameVisibleEnemies = frameEnemies.filter(e => e.pos.x <= width());
+        // v3.8.7: Decrement invulnTimer for all enemies
+        frameEnemies.forEach(e => {
+            if (e.invulnTimer > 0) e.invulnTimer -= dt();
+        });
+        // v3.8.7: Untargetable during I-Frames (Gold Shield)
+        frameVisibleEnemies = frameEnemies.filter(e => e.pos.x <= width() && e.invulnTimer <= 0);
         frameResources = get("resource");
     });
 
@@ -1131,6 +1136,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     const applyDamage = (e, dmg, isHit = true) => {
         if (!e || !e.exists() || e.hp <= 0 || isNaN(dmg)) return;
         
+        // v3.8.7: I-Frame Check
+        if (e.invulnTimer > 0) return;
+
         // v3.7.9: Spawn Protection - Enemies off-screen are invincible
         if (e.is("enemy") && e.pos.x > width()) return;
 
@@ -1138,6 +1146,12 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         if (e.shieldHP > 0) {
             if (isHit) {
                 e.shieldHP -= 1; // Shields block "hits"
+                
+                // v3.8.7: Gold Shield I-Frame trigger
+                if (e.isGoldShield) {
+                    e.invulnTimer = 0.5;
+                }
+
                 const shieldLabel = e.get("shield_label")[0];
                 if (shieldLabel) shieldLabel.text = e.shieldHP;
 

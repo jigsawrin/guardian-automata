@@ -242,6 +242,8 @@ export function spawnEnemy(gameState, enemiesSpawned) {
             maxHp: s.hp,
             shieldHP: shieldHP, // New shield HP
             maxShieldHP: shieldHP,
+            isGoldShield: isGoldShield, // v3.8.7
+            invulnTimer: 0, // v3.8.7
             targetOffset: type === "ranged" ? rand(-50, 50) : rand(-100, 100),
             ...(type === "ranged" ? { reloadTimer: 1.5, stopDistance: rand(750, 950) } : {}),
             ...(type === "warp" ? { warpTimer: rand(2, 4) } : {}),
@@ -385,6 +387,12 @@ export function spawnEnemy(gameState, enemiesSpawned) {
         ]);
 
         shieldVisual.onUpdate(() => {
+            // v3.8.7: Flicker effect during I-Frames
+            if (e.invulnTimer > 0) {
+                shieldVisual.opacity = wave(0.1, 0.8, time() * 30); // Fast flicker
+                shieldVisual.radius = s.w * 0.6 + wave(-4, 4, time() * 30);
+                return;
+            }
             // Pulse effect
             shieldVisual.opacity = wave(0.2, 0.4, time() * 4);
             shieldVisual.radius = s.w * 0.6 + wave(-2, 2, time() * 8);
