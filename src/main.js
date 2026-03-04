@@ -865,7 +865,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 return;
             }
 
-            sounds.hit();
+            sounds.explode(); // v5.2.1: Use explosion sound for suicide at core
             girl.hp -= 5;
             girlHpFill.width = Math.max(0, (girl.hp / girl.maxHp) * 100);
             if (girl.hp <= 0 && !gameState.gameOverPending) {

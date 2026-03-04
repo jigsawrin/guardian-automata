@@ -14,7 +14,7 @@ export function playSound(freq, duration, type = "sine", volume = 0.1, freqEnd =
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        
+
         osc.onended = () => {
             osc.disconnect();
             gain.disconnect();
@@ -41,7 +41,7 @@ export const sounds = {
             setTimeout(() => playSound(400, 0.3, "sawtooth", 0.1, 50), 30);
         } else {
             // Normal Explosion
-            playSound(120, 0.4, "square", 0.15, 20);
+            playSound(120, 0.4, "square", 0.2, 20); // v5.2.1: Increased volume from 0.15 to 0.2
         }
     },
     collect: () => playSound(1500, 0.1, "sine", 0.1, 800),
@@ -66,7 +66,7 @@ export const sounds = {
     },
     warningOut: () => playSound(400, 0.6, "sine", 0.1, 50),
     salvage: () => playSound(150 + Math.random() * 50, 0.1, "square", 0.1, 50),
-    pyuin: () => playSound(400, 1.2, "sine", 0.1, 1500),
+    pyuin: () => playSound(400, 1.2, "sine", 0.25, 1500), // v5.2.1: Increased volume from 0.1 to 0.25
     bossStep: () => {
         const now = audioCtx.currentTime;
         const osc1 = audioCtx.createOscillator();
