@@ -194,7 +194,6 @@ export function createExplosion(p, level = 1) {
 
     // Level 50 Super Flash
     if (level >= 50) {
-        shake(1);
         const superFlash = add([
             rect(width(), height()),
             pos(0, 0),

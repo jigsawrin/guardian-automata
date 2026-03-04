@@ -107,7 +107,6 @@ export function spawnMortar(start, target, girl, girlHpFill, gameOverCallback) {
         if (t >= 1) {
             createExplosion(target);
             sounds.explode();
-            shake(1);
             girl.hp -= 20;
             girlHpFill.width = Math.max(0, (girl.hp / girl.maxHp) * 100);
             if (girl.hp <= 0) gameOverCallback();
@@ -966,7 +965,6 @@ export function spawnSonicWave(turret, targetEnemy, gameState, applyDamage) {
                 if (sw.isColliding(e)) {
                     sw.hitEnemies.add(e.id);
                     if (applyDamage) applyDamage(e, sw.dmg, true);
-                    shake(0.2);
                 }
             });
         });

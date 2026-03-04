@@ -840,7 +840,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             }
 
             sounds.hit();
-            shake(2);
             girl.hp -= 5;
             girlHpFill.width = Math.max(0, (girl.hp / girl.maxHp) * 100);
             if (girl.hp <= 0) {
@@ -896,7 +895,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             sounds.explode(gameState.level);
             destroy(b);
         }
-        shake(5);
     });
 
     onCollide("enemy", "drone", (e, d) => {
@@ -1251,7 +1249,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
         if (b.isCrit) {
             sounds.explode(); // Flashier sound for crit
-            shake(1);
         }
 
         applyDamage(e, b.dmg, true);
@@ -1427,7 +1424,6 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 createExplosion(m.pos, gameState.level);
                 sounds.explode(gameState.level);
                 girl.hp -= 20;
-                shake(1);
                 destroy(m);
 
                 // Damage drones in explosion radius
