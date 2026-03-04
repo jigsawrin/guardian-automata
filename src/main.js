@@ -249,9 +249,9 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
 
     // Layouts
     const layouts = [
-        [{ x: 14, y: 6, type: "large" }, { x: 8, y: 2, type: "character" }, { x: 22, y: 11, type: "tall" }, { x: 24, y: 4, type: "character" }],
-        [{ x: 16, y: 5, type: "large" }, { x: 10, y: 2, type: "tall" }, { x: 10, y: 11, type: "tall" }, { x: 24, y: 2, type: "tall" }, { x: 24, y: 11, type: "tall" }],
-        [{ x: 10, y: 6, type: "large" }, { x: 22, y: 6, type: "large" }, { x: 16, y: 2, type: "character" }, { x: 16, y: 14, type: "character" }]
+        [{ x: 14, y: 7, type: "large" }, { x: 8, y: 6, type: "character" }, { x: 22, y: 6, type: "tall" }, { x: 26, y: 10, type: "character" }],
+        [{ x: 16, y: 8, type: "large" }, { x: 10, y: 6, type: "tall" }, { x: 24, y: 6, type: "character" }, { x: 28, y: 7, type: "tall" }, { x: 6, y: 10, type: "character" }],
+        [{ x: 10, y: 6, type: "large" }, { x: 22, y: 8, type: "large" }, { x: 16, y: 6, type: "character" }, { x: 16, y: 10, type: "character" }]
     ];
     const currentLayout = choose(layouts);
     for (let block of currentLayout) {
