@@ -1551,8 +1551,8 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             const cleanup = () => {
                 fwTimer.cancel();
                 get("victory_ui").forEach(destroy);
-                removeEventListener("keypress", spaceHandler);
-                removeEventListener("click", clickHandler);
+                if (spaceHandler) spaceHandler.cancel();
+                if (clickHandler) clickHandler.cancel();
             };
 
             const spaceHandler = onKeyPress("space", proceed);
