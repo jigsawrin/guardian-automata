@@ -809,9 +809,46 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 }
             }
 
+            // 2.5 Obstacle Avoidance Steering (v5.3.0)
+            // Look ahead to detect obstacles and apply steering force
+            let avoidY = 0;
+            const lookAheadX = -60; // Distance to look ahead
+            const gx = Math.floor((e.pos.x + lookAheadX) / TILE_SIZE);
+            const gy = Math.floor(e.pos.y / TILE_SIZE);
+
+            if (gx >= 0 && gx < cols && gy >= 0 && gy < rows) {
+                if (grid[gx][gy] === 1) {
+                    // Obstacle detected! Determine best bypass direction
+                    let upDist = 0;
+                    let downDist = 0;
+
+                    // Probe upward
+                    for (let i = 1; i <= 5; i++) {
+                        if (gy - i < 0 || grid[gx][gy - i] === 1) break;
+                        upDist++;
+                    }
+                    // Probe downward
+                    for (let i = 1; i <= 5; i++) {
+                        if (gy + i >= rows || grid[gx][gy + i] === 1) break;
+                        downDist++;
+                    }
+
+                    if (upDist > downDist) avoidY = -1.5;
+                    else if (downDist > upDist) avoidY = 1.5;
+                    else avoidY = (e.pos.y < MAP_HEIGHT / 2) ? -1.0 : 1.0;
+                }
+            }
+
+            // Extra safety: If currently inside an obstacle, push to nearest empty
+            const curGx = Math.floor(e.pos.x / TILE_SIZE);
+            const curGy = Math.floor(e.pos.y / TILE_SIZE);
+            if (curGx >= 0 && curGx < cols && curGy >= 0 && curGy < rows && grid[curGx][curGy] === 1) {
+                avoidY += (e.pos.y < MAP_HEIGHT / 2) ? -2.0 : 2.0;
+            }
+
             // Reduced randomness when near target
             const randAmp = distToTarget < 50 ? 0.1 : 0.5;
-            dir = vec2(dir.x + sepX + rand(-randAmp, randAmp), dir.y + sepY + rand(-randAmp, randAmp));
+            dir = vec2(dir.x + sepX + rand(-randAmp, randAmp), dir.y + sepY + avoidY + rand(-randAmp, randAmp));
 
             const corePos = vec2(CORE_X, MAP_HEIGHT / 2);
             if (e.is("ranged") && e.pos.dist(corePos) < e.stopDistance) {
@@ -865,6 +902,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 return;
             }
 
+            createExplosion(e.pos, 10); // v5.2.2: Restore visual explosion on suicide
             sounds.explode(); // v5.2.1: Use explosion sound for suicide at core
             girl.hp -= 5;
             girlHpFill.width = Math.max(0, (girl.hp / girl.maxHp) * 100);
