@@ -129,10 +129,10 @@ export function showBanner(bannerTextContent, bgColor, onFinish, isMobile = fals
         z(1000)
     ]);
     const bannerText = add([
-        text(bannerTextContent, { 
-            size: isMobile ? 24 : 48, 
-            font: "monospace", 
-            width: isMobile ? width() - 40 : undefined 
+        text(bannerTextContent, {
+            size: isMobile ? 24 : 48,
+            font: "monospace",
+            width: isMobile ? width() - 40 : undefined
         }),
         pos(width(), height() / 2),
         anchor("center"),
@@ -155,5 +155,79 @@ export function showBanner(bannerTextContent, bgColor, onFinish, isMobile = fals
                 if (onFinish) onFinish();
             });
         });
+    });
+}
+
+export function showLevelUpEffect() {
+    // Sound FX
+    sounds.pyuin();
+
+    // Visual Group for centered text
+    const group = add([
+        pos(width() / 2, height() / 2),
+        fixed(),
+        z(2100)
+    ]);
+
+    // Glitzy sparkles
+    for (let i = 0; i < 15; i++) {
+        const angle = rand(0, 360);
+        const dist = rand(50, 200);
+        const p = group.add([
+            pos(vec2(Math.cos(angle * Math.PI / 180) * 10, Math.sin(angle * Math.PI / 180) * 10)),
+            rect(4, 4),
+            color(0, 255, 255),
+            anchor("center"),
+            rotate(rand(0, 360)),
+            opacity(1),
+            scale(1),
+            {
+                dir: vec2(Math.cos(angle * Math.PI / 180), Math.sin(angle * Math.PI / 180)),
+                speed: rand(100, 300)
+            }
+        ]);
+        p.onUpdate(() => {
+            p.pos = p.pos.add(p.dir.scale(p.speed * dt()));
+            p.opacity -= dt() * 1.5;
+            p.scale = p.scale.scale(0.95);
+            if (p.opacity <= 0) destroy(p);
+        });
+    }
+
+    // Expanding Ring
+    const ring = group.add([
+        circle(10),
+        color(255, 255, 255),
+        opacity(0.4),
+        outline(2, rgb(0, 255, 255)),
+        anchor("center"),
+        scale(1)
+    ]);
+    ring.onUpdate(() => {
+        ring.scale = ring.scale.add(vec2(dt() * 10));
+        ring.opacity -= dt() * 1.5;
+        if (ring.opacity <= 0) destroy(ring);
+    });
+
+    // Rich Text
+    const txt = group.add([
+        text("LEVEL UP!", {
+            size: 64,
+            font: "monospace",
+            styles: { outline: { color: rgb(0, 0, 0), width: 4 } }
+        }),
+        anchor("center"),
+        color(0, 255, 255),
+        scale(0.1),
+        opacity(1)
+    ]);
+
+    // Animation Lifecycle
+    tween(0.1, 1.2, 0.4, (v) => txt.scale = vec2(v), easings.easeOutBack);
+    wait(1.2, () => {
+        tween(1, 0, 0.3, (v) => {
+            txt.opacity = v;
+            txt.pos.y -= 100 * dt(); // Floating up
+        }, easings.easeInQuad).onEnd(() => destroy(group));
     });
 }

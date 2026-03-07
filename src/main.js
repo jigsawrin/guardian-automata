@@ -3,7 +3,7 @@ import { audioCtx, sounds, playSound } from './audio.js';
 import { highScore, updateHighScore, createExplosion, findPath, updateGridRect } from './utils.js';
 import { spawnEnemy, spawnDrone, spawnHealBot, spawnDecoy, spawnMeteor, build, dropResource, spawnSonicWave } from './entities.js';
 import { createSystems } from './systems.js';
-import { showBanner, showUpgradePicker } from './ui.js';
+import { showBanner, showUpgradePicker, showLevelUpEffect } from './ui.js';
 import { UPGRADE_CARDS } from './cards.js';
 import { initDebugUI } from './debug.js';
 
@@ -1402,9 +1402,15 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
             gameState.xpToNext = Math.floor(gameState.xpToNext * 1.15) + 3;
         }
 
-        sounds.upgrade();
-        destroyAll("ui_picker");
-        showUpgradePicker(gameState, player, girl, UPGRADE_CARDS, null, isMobile);
+        // v5.4.0: Rich Level Up Effect & Mis-tap Prevention Delay
+        showLevelUpEffect();
+
+        // Brief delay before showing the picker to allow the eye to catch the effect 
+        // and prevent immediate mis-taps on the newly spawned buttons
+        wait(0.7, () => {
+            destroyAll("ui_picker");
+            showUpgradePicker(gameState, player, girl, UPGRADE_CARDS, null, isMobile);
+        });
     };
 
     onKeyPress("p", triggerLevelUp);
