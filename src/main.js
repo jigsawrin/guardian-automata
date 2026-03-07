@@ -137,7 +137,7 @@ function getInitialGameState() {
         phaseLabel: null,
         xp: 0,
         level: 1,
-        xpToNext: 10,
+        xpToNext: 3, // v5.3.1: Accelerated start
         meteorTimer: 10, // First meteor comes soon after picking
         paused: false,
         jammingTimer: 0,
@@ -1277,7 +1277,17 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
                 destroy(e);
                 createExplosion(diePos, gameState.level);
                 sounds.explode(gameState.level);
-                dropResource(diePos, gameState.level);
+
+                // v5.3.2: Boss specific bonus drops (Batteries)
+                if (e.is("boss_8")) {
+                    dropResource(diePos, gameState.level, "battery", 3);
+                } else if (e.is("boss_16")) {
+                    dropResource(diePos, gameState.level, "battery", 4);
+                } else if (e.is("boss_25")) {
+                    dropResource(diePos, gameState.level, "battery", 5);
+                } else {
+                    dropResource(diePos, gameState.level);
+                }
 
                 // v4.0.0: Trigger Victory Sequence after W25 Boss death
                 if (isBoss25) {
@@ -1384,7 +1394,14 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     const triggerLevelUp = () => {
         if (gameState.paused) return;
         gameState.level++;
-        gameState.xpToNext = Math.floor(gameState.xpToNext * 1.15) + 3;
+
+        // v5.3.1: Hybrid XP Curve (Faster growth until level 15)
+        if (gameState.level <= 15) {
+            gameState.xpToNext = Math.floor(gameState.xpToNext * 1.08) + 2;
+        } else {
+            gameState.xpToNext = Math.floor(gameState.xpToNext * 1.15) + 3;
+        }
+
         sounds.upgrade();
         destroyAll("ui_picker");
         showUpgradePicker(gameState, player, girl, UPGRADE_CARDS, null, isMobile);

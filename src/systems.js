@@ -31,8 +31,15 @@ export function createSystems(gameState) {
         // Calculate enemy count early to avoid UI flicker during WARNING banner
         let count = 10;
         for (let i = 2; i <= gameState.currentWave; i++) {
-            if (i % 3 === 0) count += 10;
-            else count += 6;
+            if (i <= 7) {
+                // v5.3.1: Significantly reduced scaling for early days (2-7)
+                if (i % 3 === 0) count += 5;
+                else count += 3;
+            } else {
+                // Standard scaling for day 9+
+                if (i % 3 === 0) count += 10;
+                else count += 6;
+            }
         }
         if (gameState.currentWave === 8 || gameState.currentWave === 16 || gameState.currentWave === 25) {
             gameState.enemiesInWave = 1;
