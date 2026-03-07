@@ -196,6 +196,7 @@ export function showLevelUpEffect() {
 
     // Expanding Ring
     const ring = group.add([
+        pos(0, 0),
         circle(10),
         color(255, 255, 255),
         opacity(0.4),
@@ -211,6 +212,7 @@ export function showLevelUpEffect() {
 
     // Rich Text
     const txt = group.add([
+        pos(0, 0),
         text("LEVEL UP!", {
             size: 64,
             font: "monospace",
