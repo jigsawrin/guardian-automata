@@ -158,7 +158,7 @@ export function showBanner(bannerTextContent, bgColor, onFinish, isMobile = fals
     });
 }
 
-export function showLevelUpEffect() {
+export function showLevelUpEffect(isMobile = false) {
     // Sound FX
     sounds.shupeen();
 
@@ -214,7 +214,7 @@ export function showLevelUpEffect() {
     const txt = group.add([
         pos(0, 0),
         text("LEVEL UP!", {
-            size: 64,
+            size: isMobile ? 42 : 64,
             font: "monospace",
             styles: { outline: { color: rgb(0, 0, 0), width: 4 } }
         }),

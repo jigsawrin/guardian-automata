@@ -1403,7 +1403,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         }
 
         // v5.4.0: Rich Level Up Effect & Mis-tap Prevention Delay
-        showLevelUpEffect();
+        showLevelUpEffect(isMobile);
 
         // Brief delay before showing the picker to allow the eye to catch the effect 
         // and prevent immediate mis-taps on the newly spawned buttons
