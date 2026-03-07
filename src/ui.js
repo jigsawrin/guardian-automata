@@ -160,7 +160,7 @@ export function showBanner(bannerTextContent, bgColor, onFinish, isMobile = fals
 
 export function showLevelUpEffect() {
     // Sound FX
-    sounds.pyuin();
+    sounds.shupeen();
 
     // Visual Group for centered text
     const group = add([

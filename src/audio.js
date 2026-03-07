@@ -103,5 +103,34 @@ export const sounds = {
         // Resonant wave sound
         playSound(200, 0.4, "sine", 0.15, 600);
         setTimeout(() => playSound(400, 0.3, "sawtooth", 0.08, 100), 50);
+    },
+    shupeen: () => {
+        const now = audioCtx.currentTime;
+        // "Shu" - Rapid sweep
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(800, now);
+        osc1.frequency.exponentialRampToValueAtTime(3500, now + 0.1);
+        gain1.gain.setValueAtTime(0.15, now);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start();
+        osc1.stop(now + 0.1);
+
+        // "Peen" - High resonance
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(3500, now + 0.05);
+        osc2.frequency.exponentialRampToValueAtTime(4000, now + 0.4);
+        gain2.gain.setValueAtTime(0, now);
+        gain2.gain.linearRampToValueAtTime(0.1, now + 0.05); // Fade in to blend
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now);
+        osc2.stop(now + 0.4);
     }
 };
