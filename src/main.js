@@ -144,6 +144,7 @@ function getInitialGameState() {
         spawnedEnemyTypes: [],
         victoryPending: false, // v4.1.0: Prevent wave clear banner during victory
         gameOverPending: false, // v5.1.8
+        pendingLevels: 0, // Queue for multiple level ups
     };
 }
 
@@ -1392,24 +1393,39 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
     });
 
     const triggerLevelUp = () => {
-        if (gameState.paused) return;
-        gameState.level++;
+        gameState.pendingLevels++;
 
-        // v5.3.1: Hybrid XP Curve (Faster growth until level 15)
+        // Internal processing of stats (immediate)
+        gameState.level++;
         if (gameState.level <= 15) {
             gameState.xpToNext = Math.floor(gameState.xpToNext * 1.08) + 2;
         } else {
             gameState.xpToNext = Math.floor(gameState.xpToNext * 1.15) + 3;
         }
 
-        // v5.4.0: Rich Level Up Effect & Mis-tap Prevention Delay
+        // UI trigger: only start the cycle if not already paused (menu open)
+        if (!gameState.paused) {
+            showNextLevelUpMenu();
+        }
+    };
+
+    const showNextLevelUpMenu = () => {
+        if (gameState.pendingLevels <= 0 || gameState.gameOverPending) {
+            gameState.paused = false;
+            return;
+        }
+
+        gameState.paused = true;
         showLevelUpEffect(isMobile);
 
-        // Brief delay before showing the picker to allow the eye to catch the effect 
-        // and prevent immediate mis-taps on the newly spawned buttons
+        // Brief delay before showing the picker
         wait(0.7, () => {
             destroyAll("ui_picker");
-            showUpgradePicker(gameState, player, girl, UPGRADE_CARDS, null, isMobile);
+            showUpgradePicker(gameState, player, girl, UPGRADE_CARDS, () => {
+                gameState.pendingLevels--;
+                // Recurse to show next menu if any
+                showNextLevelUpMenu();
+            }, isMobile);
         });
     };
 
@@ -1425,7 +1441,7 @@ scene("main", ({ startWave } = { startWave: 1 }) => {
         } else {
             // Scrap adds 1 XP
             gameState.xp += 1;
-            if (gameState.xp >= gameState.xpToNext) {
+            while (gameState.xp >= gameState.xpToNext) {
                 gameState.xp -= gameState.xpToNext;
                 triggerLevelUp();
             }
